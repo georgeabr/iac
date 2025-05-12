@@ -3,7 +3,7 @@
 # Replace "aws-sa-2" with your AWS CLI profile name
 provider "aws" {
   region  = "eu-west-2"
-  profile = "aws-sa-2"
+  # profile = "aws-sa-2" - not needed for Github actions, we will use secrets
 }
 
 # Define variables for user-specific values
