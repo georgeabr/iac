@@ -1,4 +1,4 @@
-# Configure the AWS Provider
+# Configure the AWS Provider 
 # Replace "eu-west-2" with your desired region
 # Replace "aws-sa-2" with your AWS CLI profile name
 provider "aws" {
