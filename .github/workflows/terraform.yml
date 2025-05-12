@@ -1,18 +1,31 @@
-name: Terraform CI/CD with Submodule
+name: Terraform CI/CD
 
 on:
   push:
     branches:
-      - main # Trigger the workflow on pushes to the main branch
+      - main # Trigger the CI/CD workflow on pushes to the main branch
     paths:
       - 'aws-tf-1/**' # Trigger only when changes are made in the aws-tf-1 directory or its subdirectories
+
+  # Add a workflow_dispatch event to allow manual triggering
+  workflow_dispatch:
+    inputs:
+      destroy:
+        description: 'Set to true to run terraform destroy'
+        required: false
+        type: boolean
+        default: false
 
 env:
   AWS_REGION: eu-west-2 # Specify your AWS region here
 
 jobs:
-  terraform:
+  terraform_apply: # Renamed the apply job for clarity
+    name: Terraform Plan and Apply
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
+
+    # This job runs only on push events, not manual triggers with destroy=true
+    if: github.event_name == 'push'
 
     steps:
     - name: Checkout code including submodules
@@ -46,7 +59,6 @@ jobs:
         cd aws-tf-1 # Changed path to your submodule directory
         terraform plan -no-color
 
-    # Add a conditional apply step
     # This step will now only run when the workflow is triggered by changes in aws-tf-1/**
     - name: Terraform Apply
       # Removed the explicit if condition as the trigger already handles this
@@ -54,3 +66,43 @@ jobs:
         cd aws-tf-1 # Changed path to your submodule directory
         terraform apply -auto-approve
 
+  terraform_destroy: # New job for destruction
+    name: Terraform Destroy
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner
+
+    # This job runs only on manual triggers with destroy=true
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.destroy == 'true'
+
+    steps:
+    - name: Checkout code including submodules
+      uses: actions/checkout@v4
+      with:
+        submodules: true # This line tells the action to clone submodules
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.11.4 # Specify the Terraform version you want to use
+
+    - name: Terraform Init (for Destroy)
+      id: init_destroy
+      # Navigate to your submodule directory before running Terraform commands
+      run: |
+        cd aws-tf-1 # Changed path to your submodule directory
+        terraform init
+
+    - name: Terraform Destroy
+      id: destroy
+      # Navigate to your submodule directory before running Terraform commands
+      run: |
+        cd aws-tf-1 # Changed path to your submodule directory
+        terraform destroy -auto-approve # -auto-approve bypasses confirmation. Use with caution!
