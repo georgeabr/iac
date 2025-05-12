@@ -159,7 +159,7 @@ resource "aws_vpc" "vpc2" {
 resource "aws_subnet" "subnet2" {
   vpc_id                  = aws_vpc.vpc2.id
   cidr_block              = "10.2.1.0/24" # Replace with your desired CIDR block within VPC2
-  availability_zone       = "eu-west-2b" # Corrected AZ specification
+  availability_zone       = "eu-west-2c" # Corrected AZ specification
   map_public_ip_on_launch = true # Automatically assign public IPs to instances in this subnet
 
   tags = {
