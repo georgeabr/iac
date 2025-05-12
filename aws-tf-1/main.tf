@@ -1,6 +1,29 @@
 # Configure the AWS Provider 
 # Replace "eu-west-2" with your desired region
 # Replace "aws-sa-2" with your AWS CLI profile name
+
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "~> 5.0" # Use a version compatible with your code
+    }
+  }
+
+  # Configure the S3 backend for state storage
+  backend "s3" {
+    bucket = "terraform-state-git" # <<-- REPLACE with your S3 bucket name
+    key    = "tf-state/terraform.tfstate" # <<-- REPLACE with a unique path for this state file
+    region = "eu-west-2" # <<-- REPLACE with your AWS region
+
+    # Uncomment the line below and replace with your DynamoDB table name for state locking (Recommended)
+    # dynamodb_table = "your-terraform-lock-table"
+
+    # Optional: Enable server-side encryption for the state file
+    # encrypt = true
+  }
+}
+
 provider "aws" {
   region  = "eu-west-2"
   # profile = "aws-sa-2" - not needed for Github actions, we will use secrets
