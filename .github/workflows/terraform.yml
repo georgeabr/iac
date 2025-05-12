@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       destroy:
-        description: 'Set to true to run terraform destroy'
+        description: 'Set to true to run terraform destroy. Leave false or empty to run plan/apply.'
         required: false
         type: boolean
         default: false
@@ -20,12 +20,14 @@ env:
   AWS_REGION: eu-west-2 # Specify your AWS region here
 
 jobs:
-  terraform_apply: # Renamed the apply job for clarity
+  terraform_apply: # Job for Plan and Apply
     name: Terraform Plan and Apply
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
 
-    # This job runs only on push events, not manual triggers with destroy=true
-    if: github.event_name == 'push'
+    # This job runs on push events OR on manual triggers where destroy is NOT true
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.destroy != 'true')
 
     steps:
     - name: Checkout code including submodules
@@ -59,14 +61,13 @@ jobs:
         cd aws-tf-1 # Changed path to your submodule directory
         terraform plan -no-color
 
-    # This step will now only run when the workflow is triggered by changes in aws-tf-1/**
+    # This step will run if the job is triggered (either by push or manual apply)
     - name: Terraform Apply
-      # Removed the explicit if condition as the trigger already handles this
       run: |
         cd aws-tf-1 # Changed path to your submodule directory
-        terraform apply -auto-approve
+        terraform apply -auto-approve # -auto-approve bypasses confirmation. Use with caution!
 
-  terraform_destroy: # New job for destruction
+  terraform_destroy: # Job for Destruction
     name: Terraform Destroy
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
 
@@ -106,3 +107,4 @@ jobs:
       run: |
         cd aws-tf-1 # Changed path to your submodule directory
         terraform destroy -auto-approve # -auto-approve bypasses confirmation. Use with caution!
+
