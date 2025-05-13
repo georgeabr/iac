@@ -109,4 +109,6 @@ jobs:
     - name: Terraform Destroy
       run: |
         cd azure-tf-1
-        terraform destroy -auto-approve -var="azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        terraform destroy -auto-approve \
+           -var="azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+           -var="ssh_public_key=${{ secrets.AZURE_SSH_PUBLIC_KEY_1 }}"
