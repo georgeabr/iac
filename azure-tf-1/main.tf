@@ -2,31 +2,50 @@ provider "azurerm" {
   features {}
 }
 
+resource "azurerm_resource_group" "rg" {
+  name     = "MyResourceGroup"
+  location = "UK South"
+}
+
 resource "azurerm_virtual_network" "vpc1" {
   name                = "VPC1"
-  location            = "East US"
-  resource_group_name = "MyResourceGroup"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
   address_space       = ["10.1.0.0/16"]
 }
 
 resource "azurerm_virtual_network" "vpc2" {
   name                = "VPC2"
-  location            = "East US"
-  resource_group_name = "MyResourceGroup"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
   address_space       = ["10.2.0.0/16"]
 }
 
-resource "azurerm_virtual_network_peering" "peering" {
-  name                      = "VPCPeering"
-  resource_group_name       = "MyResourceGroup"
+resource "azurerm_subnet" "subnet1" {
+  name                 = "Subnet1"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vpc1.name
+  address_prefixes     = ["10.1.1.0/24"]
+}
+
+resource "azurerm_subnet" "subnet2" {
+  name                 = "Subnet2"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vpc2.name
+  address_prefixes     = ["10.2.1.0/24"]
+}
+
+resource "azurerm_virtual_network_peering" "peering1" {
+  name                      = "PeeringBetweenVPCs"
+  resource_group_name       = azurerm_resource_group.rg.name
   virtual_network_name      = azurerm_virtual_network.vpc1.name
   remote_virtual_network_id = azurerm_virtual_network.vpc2.id
 }
 
 resource "azurerm_network_security_group" "nsg" {
   name                = "NSG-Allow-Ping-SSH"
-  location            = "East US"
-  resource_group_name = "MyResourceGroup"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
 
   security_rule {
     name                       = "AllowPing"
@@ -53,13 +72,37 @@ resource "azurerm_network_security_group" "nsg" {
   }
 }
 
+resource "azurerm_network_interface" "vm1_nic" {
+  name                = "VM1-NIC"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "VM1-IPConfig"
+    subnet_id                     = azurerm_subnet.subnet1.id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+resource "azurerm_network_interface" "vm2_nic" {
+  name                = "VM2-NIC"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "VM2-IPConfig"
+    subnet_id                     = azurerm_subnet.subnet2.id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
 resource "azurerm_linux_virtual_machine" "vm1" {
   name                  = "VM1"
-  location              = "East US"
-  resource_group_name   = "MyResourceGroup"
+  location              = azurerm_resource_group.rg.location
+  resource_group_name   = azurerm_resource_group.rg.name
   size                  = "Standard_B1s"
   admin_username        = "azureuser"
-  network_interface_ids = [azurerm_network_interface.vm1.id]
+  network_interface_ids = [azurerm_network_interface.vm1_nic.id]
 
   os_disk {
     caching              = "ReadWrite"
@@ -74,11 +117,11 @@ resource "azurerm_linux_virtual_machine" "vm1" {
 
 resource "azurerm_linux_virtual_machine" "vm2" {
   name                  = "VM2"
-  location              = "East US"
-  resource_group_name   = "MyResourceGroup"
+  location              = azurerm_resource_group.rg.location
+  resource_group_name   = azurerm_resource_group.rg.name
   size                  = "Standard_B1s"
   admin_username        = "azureuser"
-  network_interface_ids = [azurerm_network_interface.vm2.id]
+  network_interface_ids = [azurerm_network_interface.vm2_nic.id]
 
   os_disk {
     caching              = "ReadWrite"
