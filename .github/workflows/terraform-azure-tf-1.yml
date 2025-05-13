@@ -30,10 +30,6 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Set SSH Public Key Variable
-      run: |
-        echo 'ssh_public_key = "${{ secrets.AZURE_SSH_PUBLIC_KEY_1 }}"' > terraform.tfvars
-
     - name: Authenticate to Azure
       run: |
         az login --service-principal \
