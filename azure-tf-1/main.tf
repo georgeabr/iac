@@ -84,6 +84,21 @@ resource "azurerm_network_security_group" "nsg" {
   }
 }
 
+# Assign Public IPs to Both VMs
+resource "azurerm_public_ip" "vm1_public_ip" {
+  name                = "vm1-public-ip"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+}
+
+resource "azurerm_public_ip" "vm2_public_ip" {
+  name                = "vm2-public-ip"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+}
+
 resource "azurerm_network_interface" "vm1_nic" {
   name                = "VM1-NIC"
   location            = azurerm_resource_group.rg.location
@@ -93,6 +108,7 @@ resource "azurerm_network_interface" "vm1_nic" {
     name                          = "VM1-IPConfig"
     subnet_id                     = azurerm_subnet.subnet1.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.vm1_public_ip.id
   }
 }
 
@@ -105,6 +121,7 @@ resource "azurerm_network_interface" "vm2_nic" {
     name                          = "VM2-IPConfig"
     subnet_id                     = azurerm_subnet.subnet2.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.vm2_public_ip.id
   }
 }
 
@@ -130,7 +147,7 @@ resource "azurerm_linux_virtual_machine" "vm1" {
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = var.ssh_public_key # Uses GitHub Secret
+    public_key = var.ssh_public_key
   }
 }
 
@@ -156,6 +173,23 @@ resource "azurerm_linux_virtual_machine" "vm2" {
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = var.ssh_public_key # Uses GitHub Secret
+    public_key = var.ssh_public_key
   }
+}
+
+# Output Public and Private IPs
+output "vm1_public_ip" {
+  value = azurerm_public_ip.vm1_public_ip.ip_address
+}
+
+output "vm1_private_ip" {
+  value = azurerm_network_interface.vm1_nic.private_ip_address
+}
+
+output "vm2_public_ip" {
+  value = azurerm_public_ip.vm2_public_ip.ip_address
+}
+
+output "vm2_private_ip" {
+  value = azurerm_network_interface.vm2_nic.private_ip_address
 }
