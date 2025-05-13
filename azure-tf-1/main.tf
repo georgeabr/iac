@@ -3,7 +3,7 @@ terraform {
     resource_group_name  = "ResourceGroupNE"
     storage_account_name = "myterraformstategit1"
     container_name       = "terraform-state"
-    key                 = "terraform-azure-1.tfstate"
+    key                 = "terraform-azure-tf-1.tfstate"
   }
 }
 
