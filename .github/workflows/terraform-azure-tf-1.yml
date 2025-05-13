@@ -34,6 +34,10 @@ jobs:
       run: |
         echo 'ssh_public_key = "${{ secrets.AZURE_SSH_PUBLIC_KEY_1 }}"' > terraform.tfvars
 
+    - name: Set Subscription ID Variable
+      run: |
+        echo 'azure_subscription_id = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"' > terraform.tfvars
+
     - name: Authenticate to Azure
       run: |
         az login --service-principal \
