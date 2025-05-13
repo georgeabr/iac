@@ -58,7 +58,10 @@ jobs:
     - name: Terraform Plan with Debug
       run: |
         cd azure-tf-1
-        terraform plan -var="azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" -no-color
+        terraform plan -var="ssh_public_key=${{ secrets.AZURE_SSH_PUBLIC_KEY_1 }}" \
+                   -var="azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+                   -no-color | tee plan.log
+        cat plan.log  # Debugging step to check logs        
         
     - name: Terraform Apply
       run: |
