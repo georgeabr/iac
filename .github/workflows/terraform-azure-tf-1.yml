@@ -30,11 +30,9 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Print Environment Variables
+    - name: Set SSH Public Key Variable
       run: |
-        echo "Azure Client ID: ${{ secrets.AZURE_CLIENT_ID }}"
-        echo "Azure Tenant ID: ${{ secrets.AZURE_TENANT_ID }}"
-        echo "Azure Subscription ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        echo 'ssh_public_key = "${{ secrets.AZURE_SSH_PUBLIC_KEY_1 }}"' > terraform.tfvars
 
     - name: Authenticate to Azure
       run: |
@@ -51,10 +49,6 @@ jobs:
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: 1.11.4
-        
-    - name: Set SSH Public Key Variable
-      run: |
-        echo 'ssh_public_key = "${{ secrets.AZURE_SSH_PUBLIC_KEY_1 }}"' > terraform.tfvars
 
     - name: Terraform Init
       run: |
@@ -82,11 +76,9 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Print Environment Variables
+    - name: Set SSH Public Key Variable
       run: |
-        echo "Azure Client ID: ${{ secrets.AZURE_CLIENT_ID }}"
-        echo "Azure Tenant ID: ${{ secrets.AZURE_TENANT_ID }}"
-        echo "Azure Subscription ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        echo 'ssh_public_key = "${{ secrets.AZURE_SSH_PUBLIC_KEY_1 }}"' > terraform.tfvars
 
     - name: Authenticate to Azure
       run: |
