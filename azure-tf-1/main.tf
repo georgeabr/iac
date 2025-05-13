@@ -1,3 +1,21 @@
+terraform {
+  backend "azurerm" {
+    resource_group_name  = "MyResourceGroup"
+    storage_account_name = "myterraformstate"
+    container_name       = "terraform-state"
+    key                 = "terraform.tfstate"
+  }
+}
+
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_resource_group" "rg" {
+  name     = "MyResourceGroup"
+  location = "UK South"
+}
+
 provider "azurerm" {
   features {}
 }
