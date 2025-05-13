@@ -34,11 +34,6 @@ jobs:
       run: |
         echo 'ssh_public_key = "${{ secrets.AZURE_SSH_PUBLIC_KEY_1 }}"' > terraform.tfvars
 
-    - name: Set Subscription ID Variable
-      run: |
-        echo "azure_subscription_id = \"${{ secrets.AZURE_SUBSCRIPTION_ID }}\"" > terraform.tfvars
-        cat terraform.tfvars  # Debugging step to verify correct injection
-
     - name: Authenticate to Azure
       run: |
         az login --service-principal \
@@ -63,9 +58,8 @@ jobs:
     - name: Terraform Plan with Debug
       run: |
         cd azure-tf-1
-        terraform plan -no-color | tee plan.log
-        cat plan.log
-
+        terraform plan -var="azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" -no-color
+        
     - name: Terraform Apply
       run: |
         cd azure-tf-1
