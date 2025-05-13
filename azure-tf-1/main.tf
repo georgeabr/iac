@@ -119,6 +119,13 @@ resource "azurerm_linux_virtual_machine" "vm1" {
     storage_account_type = "Standard_LRS"
   }
 
+  source_image_reference {
+    publisher = "Debian"
+    offer     = "debian-12"
+    sku       = "12"
+    version   = "latest"
+  }
+
   admin_ssh_key {
     username   = "azureuser"
     public_key = var.ssh_public_key # Uses GitHub Secret
@@ -136,6 +143,13 @@ resource "azurerm_linux_virtual_machine" "vm2" {
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Debian"
+    offer     = "debian-12"
+    sku       = "12"
+    version   = "latest"
   }
 
   admin_ssh_key {
