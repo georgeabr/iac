@@ -51,20 +51,22 @@ jobs:
         cd azure-tf-1
         terraform init
 
-    - name: Terraform Plan with Debug
+    - name: Terraform Validate
+      run: |
+        cd azure-tf-1
+        terraform validate
+
+    - name: Terraform Plan
       run: |
         cd azure-tf-1
         terraform plan -var="ssh_public_key=${{ secrets.AZURE_SSH_PUBLIC_KEY_1 }}" \
                    -var="azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
-                   -no-color | tee plan.log
-        cat plan.log  # Debugging step to check logs        
         
     - name: Terraform Apply
       run: |
         cd azure-tf-1
         terraform apply -auto-approve -var="azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
                         -var="ssh_public_key=${{ secrets.AZURE_SSH_PUBLIC_KEY_1 }}" \
-                        -no-color
 
   terraform_destroy:
     name: Terraform Destroy for Azure
@@ -76,10 +78,6 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
-
-    - name: Set SSH Public Key Variable
-      run: |
-        echo 'ssh_public_key = "${{ secrets.AZURE_SSH_PUBLIC_KEY_1 }}"' > terraform.tfvars
 
     - name: Authenticate to Azure
       run: |
