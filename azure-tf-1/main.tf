@@ -4,16 +4,8 @@ terraform {
     storage_account_name = "myterraformstategit1"
     container_name       = "terraform-state"
     key                 = "terraform-azure-tf-1.tfstate"
+    use_azuread_auth     = true  # Enables authentication via Azure AD
   }
-}
-
-provider "azurerm" {
-  features {}
-}
-
-resource "azurerm_resource_group" "rg" {
-  name     = "MyResourceGroup"
-  location = "UK South"
 }
 
 provider "azurerm" {
@@ -129,7 +121,7 @@ resource "azurerm_linux_virtual_machine" "vm1" {
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub")
+    public_key = var.ssh_public_key # Uses GitHub Secret
   }
 }
 
@@ -148,6 +140,6 @@ resource "azurerm_linux_virtual_machine" "vm2" {
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = "${var.ssh_public_key}"
+    public_key = var.ssh_public_key # Uses GitHub Secret
   }
 }
