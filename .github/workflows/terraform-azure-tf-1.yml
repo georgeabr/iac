@@ -1,0 +1,91 @@
+name: Deploy and Destroy Azure Terraform
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'azure-tf-1/**' # Trigger only if files in `azure-tf-1` change
+
+  workflow_dispatch: # Allow manual triggering
+    inputs:
+      destroy:
+        description: 'Set to true to run terraform destroy. Leave false or empty to run plan/apply.'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  AZURE_REGION: UK South
+
+jobs:
+  terraform_apply:
+    name: Terraform Plan & Apply for Azure
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.destroy != 'true')
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Azure
+      run: |
+        az login --service-principal \
+          --username ${{ secrets.AZURE_CLIENT_ID }} \
+          --password ${{ secrets.AZURE_CLIENT_SECRET }} \
+          --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+    - name: Set Up Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.11.4
+
+    - name: Terraform Init
+      run: |
+        cd azure-tf-1
+        terraform init
+
+    - name: Terraform Plan
+      run: |
+        cd azure-tf-1
+        terraform plan -no-color
+
+    - name: Terraform Apply
+      run: |
+        cd azure-tf-1
+        terraform apply -auto-approve
+
+  terraform_destroy:
+    name: Terraform Destroy for Azure
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.destroy == 'true'
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Azure
+      run: |
+        az login --service-principal \
+          --username ${{ secrets.AZURE_CLIENT_ID }} \
+          --password ${{ secrets.AZURE_CLIENT_SECRET }} \
+          --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+    - name: Set Up Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.11.4
+
+    - name: Terraform Init (Destroy)
+      run: |
+        cd azure-tf-1
+        terraform init
+
+    - name: Terraform Destroy
+      run: |
+        cd azure-tf-1
+        terraform destroy -auto-approve
