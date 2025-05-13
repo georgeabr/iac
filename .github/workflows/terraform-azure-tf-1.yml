@@ -59,10 +59,11 @@ jobs:
         cd azure-tf-1
         terraform init
 
-    - name: Terraform Plan
+    - name: Terraform Plan with Debug
       run: |
         cd azure-tf-1
-        terraform plan -no-color
+        terraform plan -no-color | tee plan.log
+        cat plan.log
 
     - name: Terraform Apply
       run: |
