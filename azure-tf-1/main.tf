@@ -3,7 +3,7 @@ terraform {
     resource_group_name  = "ResourceGroupNE"
     storage_account_name = "myterraformstategit1"
     container_name       = "terraform-state"
-    key                 = "terraform-azure-tf-33333.tfstate"
+    key                 = "terraform-azure-tf-333333.tfstate"
     use_azuread_auth     = true  # Enables authentication via Azure AD
   }
 }
