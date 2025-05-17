@@ -84,6 +84,83 @@ resource "azurerm_public_ip" "vm2_ipv6" {
   ip_version          = "IPv6"
 }
 
+# 🔹 Network Security Groups for SSH and Ping
+resource "azurerm_network_security_group" "vm1_nsg" {
+  name                = "VM1-NSG"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  # Allow SSH (TCP port 22) from anywhere
+  security_rule {
+    name                       = "AllowSSH"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*" # WARNING: Allowing SSH from anywhere (0.0.0.0/0 or *) is not recommended for production. Restrict to known IPs.
+    destination_address_prefix = "*"
+  }
+
+  # Allow Ping (ICMP) from VPC2's CIDR block
+  security_rule {
+    name                       = "AllowPingFromVPC2"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Icmp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = azurerm_virtual_network.vpc2.address_space[0] # Allow from VPC2's IPv4 CIDR
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_network_security_group" "vm2_nsg" {
+  name                = "VM2-NSG"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  # Allow SSH (TCP port 22) from anywhere
+  security_rule {
+    name                       = "AllowSSH"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*" # WARNING: Allowing SSH from anywhere (0.0.0.0/0 or *) is not recommended for production. Restrict to known IPs.
+    destination_address_prefix = "*"
+  }
+
+  # Allow Ping (ICMP) from VPC1's CIDR block
+  security_rule {
+    name                       = "AllowPingFromVPC1"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Icmp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = azurerm_virtual_network.vpc1.address_space[0] # Allow from VPC1's IPv4 CIDR
+    destination_address_prefix = "*"
+  }
+}
+
+# 🔹 Associate NSGs with Network Interfaces
+resource "azurerm_network_interface_security_group_association" "vm1_nsg_association" {
+  network_interface_id      = azurerm_network_interface.vm1_nic.id
+  network_security_group_id = azurerm_network_security_group.vm1_nsg.id
+}
+
+resource "azurerm_network_interface_security_group_association" "vm2_nsg_association" {
+  network_interface_id      = azurerm_network_interface.vm2_nic.id
+  network_security_group_id = azurerm_network_security_group.vm2_nsg.id
+}
+
+
 # 🔹 Network Interfaces for VM1 & VM2 (Dual-Stack)
 resource "azurerm_network_interface" "vm1_nic" {
   name                = "VM1-NIC"
