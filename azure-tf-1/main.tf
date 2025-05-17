@@ -110,6 +110,10 @@ resource "azurerm_network_interface" "vm1_nic" {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm1_public_ip.id
   }
+
+  # Attach NSG to NIC
+  network_security_group_id = azurerm_network_security_group.nsg.id
+
 }
 
 resource "azurerm_network_interface" "vm2_nic" {
@@ -123,6 +127,10 @@ resource "azurerm_network_interface" "vm2_nic" {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm2_public_ip.id
   }
+
+  # Attach NSG to NIC
+  network_security_group_id = azurerm_network_security_group.nsg.id
+
 }
 
 resource "azurerm_linux_virtual_machine" "vm1" {
