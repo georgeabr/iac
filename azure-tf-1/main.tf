@@ -320,7 +320,7 @@ resource "azurerm_route" "vpc1_to_vpc2_route_ipv4" {
   resource_group_name    = azurerm_resource_group.rg.name
   route_table_name       = azurerm_route_table.rt1.name # Add route to the custom route table
   address_prefix         = "10.2.0.0/16" # VPC2 IPv4 CIDR
-  next_hop_type          = "VirtualNetworkGateway" # Next hop for peering is VirtualNetworkGateway
+  next_hop_type          = "VnetLocal" # Corrected: Use VnetLocal for peering routes
   next_hop_in_ip_address = null # Not needed for VNet Peering
 
   # Ensure peering is established before adding the route
@@ -333,7 +333,7 @@ resource "azurerm_route" "vpc1_to_vpc2_route_ipv6" {
   resource_group_name    = azurerm_resource_group.rg.name
   route_table_name       = azurerm_route_table.rt1.name # Add route to the custom route table
   address_prefix         = "2001:db8:abcd:0022::/64" # VPC2 IPv6 CIDR
-  next_hop_type          = "VirtualNetworkGateway" # Next hop for peering is VirtualNetworkGateway
+  next_hop_type          = "VnetLocal" # Corrected: Use VnetLocal for peering routes
   next_hop_in_ip_address = null # Not needed for VNet Peering
   # Ensure peering is established before adding the route
   depends_on = [azurerm_virtual_network_peering.vpc1_to_vpc2_peering]
@@ -346,7 +346,7 @@ resource "azurerm_route" "vpc2_to_vpc1_route_ipv4" {
   resource_group_name    = azurerm_resource_group.rg.name
   route_table_name       = azurerm_route_table.rt2.name # Add route to the custom route table
   address_prefix         = "10.1.0.0/16" # VPC1 IPv4 CIDR
-  next_hop_type          = "VirtualNetworkGateway" # Next hop for peering is VirtualNetworkGateway
+  next_hop_type          = "VnetLocal" # Corrected: Use VnetLocal for peering routes
   next_hop_in_ip_address = null # Not needed for VNet Peering
   # Ensure peering is established before adding the route
   depends_on = [azurerm_virtual_network_peering.vpc1_to_vpc2_peering]
@@ -358,7 +358,7 @@ resource "azurerm_route" "vpc2_to_vpc1_route_ipv6" {
   resource_group_name    = azurerm_resource_group.rg.name
   route_table_name       = azurerm_route_table.rt2.name # Add route to the custom route table
   address_prefix         = "2001:db8:abcd:0012::/64" # VPC1 IPv6 CIDR
-  next_hop_type          = "VirtualNetworkGateway" # Next hop for peering is VirtualNetworkGateway
+  next_hop_type          = "VnetLocal" # Corrected: Use VnetLocal for peering routes
   next_hop_in_ip_address = null # Not needed for VNet Peering
   # Ensure peering is established before adding the route
   depends_on = [azurerm_virtual_network_peering.vpc1_to_vpc2_peering]
