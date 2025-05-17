@@ -127,7 +127,7 @@ resource "azurerm_linux_virtual_machine" "vm1" {
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
-    size                 = 30  # 30GB Disk
+    disk_size_gb         = 30  # 30GB Disk
   }
 
   source_image_reference {
