@@ -33,7 +33,7 @@ resource "azurerm_virtual_network" "vpc2" {
   address_space       = ["10.2.0.0/16", "2001:db8:abcd:0022::/64"]
 }
 
-# 🔹 Subnets (Dual-Stack)
+# 🔹 Subnets
 resource "azurerm_subnet" "subnet1_dual" {
   name                 = "Subnet1-DualStack"
   resource_group_name  = azurerm_resource_group.rg.name
@@ -60,7 +60,7 @@ resource "azurerm_network_security_group" "vm1_nsg" {
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
-    source_address_prefix      = "0.0.0.0/0"
+    source_address_prefix      = "0.0.0.0/0"  # Consider restricting
     destination_port_range     = "22"
   }
 
@@ -86,7 +86,7 @@ resource "azurerm_network_security_group" "vm2_nsg" {
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
-    source_address_prefix      = "0.0.0.0/0"
+    source_address_prefix      = "0.0.0.0/0"  # Consider restricting
     destination_port_range     = "22"
   }
 
@@ -151,6 +151,7 @@ resource "azurerm_virtual_network_peering" "vpc1_to_vpc2" {
   virtual_network_name         = azurerm_virtual_network.vpc1.name
   remote_virtual_network_id    = azurerm_virtual_network.vpc2.id
   allow_virtual_network_access = true
+  allow_forwarded_traffic      = true
 }
 
 resource "azurerm_virtual_network_peering" "vpc2_to_vpc1" {
@@ -159,6 +160,7 @@ resource "azurerm_virtual_network_peering" "vpc2_to_vpc1" {
   virtual_network_name         = azurerm_virtual_network.vpc2.name
   remote_virtual_network_id    = azurerm_virtual_network.vpc1.id
   allow_virtual_network_access = true
+  allow_forwarded_traffic      = true
 }
 
 # 🔹 Outputs for All IPs
