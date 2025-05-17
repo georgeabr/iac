@@ -3,7 +3,7 @@ terraform {
     resource_group_name  = "ResourceGroupNE"
     storage_account_name = "myterraformstategit1"
     container_name       = "terraform-state"
-    key                 = "terraform-azure-tf-1.tfstate"
+    key                  = "terraform-azure-tf-1.tfstate"
     use_azuread_auth     = true
   }
 }
@@ -96,6 +96,7 @@ resource "azurerm_network_interface" "vm1_nic" {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm1_ipv4.id
     primary                       = false
+    private_ip_address_version    = "IPv4" # Added: Explicitly set IP version
   }
 
   ip_configuration {
@@ -104,6 +105,7 @@ resource "azurerm_network_interface" "vm1_nic" {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm1_ipv6.id
     primary                       = true  # 🔹 IPv6 as primary
+    private_ip_address_version    = "IPv6" # Added: Explicitly set IP version
   }
 }
 
@@ -118,6 +120,7 @@ resource "azurerm_network_interface" "vm2_nic" {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm2_ipv4.id
     primary                       = false
+    private_ip_address_version    = "IPv4" # Added: Explicitly set IP version
   }
 
   ip_configuration {
@@ -126,6 +129,7 @@ resource "azurerm_network_interface" "vm2_nic" {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm2_ipv6.id
     primary                       = true  # 🔹 IPv6 as primary
+    private_ip_address_version    = "IPv6" # Added: Explicitly set IP version
   }
 }
 
