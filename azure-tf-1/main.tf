@@ -103,7 +103,7 @@ resource "azurerm_network_security_group" "vm1_nsg" {
     destination_address_prefix = "*"
   }
 
-  # Allow Ping (ICMP) from anywhere
+  # Allow Ping (ICMP) from anywhere (for public ping)
   security_rule {
     name                       = "AllowPingFromAnywhere"
     priority                   = 110
@@ -113,6 +113,32 @@ resource "azurerm_network_security_group" "vm1_nsg" {
     source_port_range          = "*"
     destination_port_range     = "*"
     source_address_prefix      = "*" # Allow from anywhere
+    destination_address_prefix = "*"
+  }
+
+  # Allow Ping (ICMP) from VPC2's IPv4 CIDR (for private ping)
+  security_rule {
+    name                       = "AllowPingFromVPC2-IPv4"
+    priority                   = 120 # Higher priority than AllowPingFromAnywhere
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Icmp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "10.2.0.0/16" # VPC2 IPv4 CIDR
+    destination_address_prefix = "*"
+  }
+
+    # Allow Ping (ICMP) from VPC2's IPv6 CIDR (for private ping)
+  security_rule {
+    name                       = "AllowPingFromVPC2-IPv6"
+    priority                   = 130 # Higher priority than AllowPingFromAnywhere
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Icmp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "2001:db8:abcd:0022::/64" # VPC2 IPv6 CIDR
     destination_address_prefix = "*"
   }
 }
@@ -135,7 +161,7 @@ resource "azurerm_network_security_group" "vm2_nsg" {
     destination_address_prefix = "*"
   }
 
-  # Allow Ping (ICMP) from anywhere
+  # Allow Ping (ICMP) from anywhere (for public ping)
   security_rule {
     name                       = "AllowPingFromAnywhere"
     priority                   = 110
@@ -145,6 +171,32 @@ resource "azurerm_network_security_group" "vm2_nsg" {
     source_port_range          = "*"
     destination_port_range     = "*"
     source_address_prefix      = "*" # Allow from anywhere
+    destination_address_prefix = "*"
+  }
+
+  # Allow Ping (ICMP) from VPC1's IPv4 CIDR (for private ping)
+  security_rule {
+    name                       = "AllowPingFromVPC1-IPv4"
+    priority                   = 120 # Higher priority than AllowPingFromAnywhere
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Icmp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "10.1.0.0/16" # VPC1 IPv4 CIDR
+    destination_address_prefix = "*"
+  }
+
+  # Allow Ping (ICMP) from VPC1's IPv6 CIDR (for private ping)
+  security_rule {
+    name                       = "AllowPingFromVPC1-IPv6"
+    priority                   = 130 # Higher priority than AllowPingFromAnywhere
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Icmp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "2001:db8:abcd:0012::/64" # VPC1 IPv6 CIDR
     destination_address_prefix = "*"
   }
 }
