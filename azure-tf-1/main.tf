@@ -108,8 +108,13 @@ resource "azurerm_network_interface" "vm1_nic" {
     public_ip_address_id          = azurerm_public_ip.vm1_public_ip.id
   }
 
-  # Attach NSG to NIC
+# Add NSG Association Here (After NIC Definition, Before VM Resources)
+resource "azurerm_network_interface_security_group_association" "vm2_nsg_assoc" {
+  network_interface_id      = azurerm_network_interface.vm2_nic.id
   network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+
 }
 
 resource "azurerm_network_interface" "vm2_nic" {
@@ -124,8 +129,12 @@ resource "azurerm_network_interface" "vm2_nic" {
     public_ip_address_id          = azurerm_public_ip.vm2_public_ip.id
   }
 
-  # Attach NSG to NIC
+# Add NSG Association Here (After NIC Definition, Before VM Resources)
+resource "azurerm_network_interface_security_group_association" "vm2_nsg_assoc" {
+  network_interface_id      = azurerm_network_interface.vm2_nic.id
   network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
 }
 
 resource "azurerm_linux_virtual_machine" "vm1" {
