@@ -428,6 +428,11 @@ output "vm1_public_ipv6" {
   value = azurerm_public_ip.vm1_ipv6.ip_address
 }
 
+output "vm1_private_ipv4" { # Added: Output for VM1 Private IPv4
+  description = "Private IPv4 address of VM 1"
+  value       = azurerm_network_interface.vm1_nic.ip_configuration[0].private_ip_address # Assuming IPv4 config is the first one
+}
+
 output "vm1_private_ipv6" {
   description = "Private IPv6 address of VM 1"
   value = azurerm_network_interface.vm1_nic.private_ip_address
@@ -441,6 +446,11 @@ output "vm2_public_ipv4" {
 output "vm2_public_ipv6" {
   description = "Public IPv6 address of VM 2"
   value = azurerm_public_ip.vm2_ipv6.ip_address
+}
+
+output "vm2_private_ipv4" { # Added: Output for VM2 Private IPv4
+  description = "Private IPv4 address of VM 2"
+  value       = azurerm_network_interface.vm2_nic.ip_configuration[0].private_ip_address # Assuming IPv4 config is the first one
 }
 
 output "vm2_private_ipv6" {
