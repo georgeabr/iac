@@ -265,6 +265,39 @@ resource "azurerm_linux_virtual_machine" "vm2" {
   }
 }
 
+# 🔹 Custom Route Tables for VPC1 and VPC2
+resource "azurerm_route_table" "rt1" {
+  name                = "VPC1-RT"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  # Note: Default routes to Internet Gateway are typically handled by system routes
+  # when a subnet is associated with a route table and has a public IP or is in a public subnet.
+  # Explicitly defining them here is optional but can be done if needed.
+}
+
+resource "azurerm_route_table" "rt2" {
+  name                = "VPC2-RT"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  # Note: Default routes to Internet Gateway are typically handled by system routes
+  # when a subnet is associated with a route table and has a public IP or is in a public subnet.
+  # Explicitly defining them here is optional but can be done if needed.
+}
+
+# 🔹 Associate Custom Route Tables with Subnets
+resource "azurerm_subnet_route_table_association" "subnet1_rta" {
+  subnet_id      = azurerm_subnet.subnet1_dual.id
+  route_table_id = azurerm_route_table.rt1.id
+}
+
+resource "azurerm_subnet_route_table_association" "subnet2_rta" {
+  subnet_id      = azurerm_subnet.subnet2_dual.id
+  route_table_id = azurerm_route_table.rt2.id
+}
+
+
 # 🔹 VNet Peering between VPC1 and VPC2
 resource "azurerm_virtual_network_peering" "vpc1_to_vpc2_peering" {
   name                      = "vpc1-to-vpc2-peering"
