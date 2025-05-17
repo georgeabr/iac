@@ -103,7 +103,7 @@ resource "azurerm_network_security_group" "vm1_nsg" {
     destination_address_prefix = "*"
   }
 
-  # Allow Ping (ICMP) from VPC2's CIDR block
+  # Allow Ping (ICMP) from VPC2's CIDR block (IPv4)
   security_rule {
     name                       = "AllowPingFromVPC2"
     priority                   = 110
@@ -112,7 +112,7 @@ resource "azurerm_network_security_group" "vm1_nsg" {
     protocol                   = "Icmp"
     source_port_range          = "*"
     destination_port_range     = "*"
-    source_address_prefix      = azurerm_virtual_network.vpc2.address_space[0] # Allow from VPC2's IPv4 CIDR
+    source_address_prefix      = "10.2.0.0/16" # Corrected: Use literal IPv4 CIDR
     destination_address_prefix = "*"
   }
 }
@@ -135,7 +135,7 @@ resource "azurerm_network_security_group" "vm2_nsg" {
     destination_address_prefix = "*"
   }
 
-  # Allow Ping (ICMP) from VPC1's CIDR block
+  # Allow Ping (ICMP) from VPC1's CIDR block (IPv4)
   security_rule {
     name                       = "AllowPingFromVPC1"
     priority                   = 110
@@ -144,7 +144,7 @@ resource "azurerm_network_security_group" "vm2_nsg" {
     protocol                   = "Icmp"
     source_port_range          = "*"
     destination_port_range     = "*"
-    source_address_prefix      = azurerm_virtual_network.vpc1.address_space[0] # Allow from VPC1's IPv4 CIDR
+    source_address_prefix      = "10.1.0.0/16" # Corrected: Use literal IPv4 CIDR
     destination_address_prefix = "*"
   }
 }
