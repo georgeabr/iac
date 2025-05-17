@@ -103,16 +103,16 @@ resource "azurerm_network_security_group" "vm1_nsg" {
     destination_address_prefix = "*"
   }
 
-  # Allow Ping (ICMP) from VPC2's CIDR block (IPv4)
+  # Allow Ping (ICMP) from anywhere # Updated: Source changed to '*'
   security_rule {
-    name                       = "AllowPingFromVPC2"
+    name                       = "AllowPingFromAnywhere" # Updated rule name
     priority                   = 110
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Icmp"
     source_port_range          = "*"
     destination_port_range     = "*"
-    source_address_prefix      = "*" # From anywhere
+    source_address_prefix      = "*" # Corrected: Allow from anywhere
     destination_address_prefix = "*"
   }
 }
@@ -135,16 +135,16 @@ resource "azurerm_network_security_group" "vm2_nsg" {
     destination_address_prefix = "*"
   }
 
-  # Allow Ping (ICMP) from VPC1's CIDR block (IPv4)
+  # Allow Ping (ICMP) from anywhere # Updated: Source changed to '*'
   security_rule {
-    name                       = "AllowPingFromVPC1"
+    name                       = "AllowPingFromAnywhere" # Updated rule name
     priority                   = 110
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Icmp"
     source_port_range          = "*"
     destination_port_range     = "*"
-    source_address_prefix      = "10.1.0.0/16" # Corrected: Use literal IPv4 CIDR
+    source_address_prefix      = "*" # Corrected: Allow from anywhere
     destination_address_prefix = "*"
   }
 }
@@ -265,19 +265,33 @@ resource "azurerm_linux_virtual_machine" "vm2" {
   }
 }
 
-# 🔹 Output Public & Private IPv6 Addresses
+# 🔹 Output Public & Private IPv4 and IPv6 Addresses
+output "vm1_public_ipv4" { # Added: Output for VM1 Public IPv4
+  description = "Public IPv4 address of VM 1"
+  value       = azurerm_public_ip.vm1_ipv4.ip_address
+}
+
 output "vm1_public_ipv6" {
+  description = "Public IPv6 address of VM 1"
   value = azurerm_public_ip.vm1_ipv6.ip_address
 }
 
 output "vm1_private_ipv6" {
+  description = "Private IPv6 address of VM 1"
   value = azurerm_network_interface.vm1_nic.private_ip_address
 }
 
+output "vm2_public_ipv4" { # Added: Output for VM2 Public IPv4
+  description = "Public IPv4 address of VM 2"
+  value       = azurerm_public_ip.vm2_ipv4.ip_address
+}
+
 output "vm2_public_ipv6" {
+  description = "Public IPv6 address of VM 2"
   value = azurerm_public_ip.vm2_ipv6.ip_address
 }
 
 output "vm2_private_ipv6" {
+  description = "Private IPv6 address of VM 2"
   value = azurerm_network_interface.vm2_nic.private_ip_address
 }
