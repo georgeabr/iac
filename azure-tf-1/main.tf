@@ -47,7 +47,16 @@ resource "azurerm_subnet" "subnet2_dual" {
   address_prefixes     = ["10.2.1.0/24", "2001:db8:abcd:0022::/64"]
 }
 
-# 🔹 Public IPv6 for VM1 & VM2
+# 🔹 Public IPs for VM1 & VM2 (IPv4 + IPv6)
+resource "azurerm_public_ip" "vm1_ipv4" {
+  name                = "vm1-ipv4"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  ip_version          = "IPv4"
+}
+
 resource "azurerm_public_ip" "vm1_ipv6" {
   name                = "vm1-ipv6"
   location            = azurerm_resource_group.rg.location
@@ -55,6 +64,15 @@ resource "azurerm_public_ip" "vm1_ipv6" {
   allocation_method   = "Static"
   sku                 = "Standard"
   ip_version          = "IPv6"
+}
+
+resource "azurerm_public_ip" "vm2_ipv4" {
+  name                = "vm2-ipv4"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  ip_version          = "IPv4"
 }
 
 resource "azurerm_public_ip" "vm2_ipv6" {
@@ -73,14 +91,15 @@ resource "azurerm_network_interface" "vm1_nic" {
   resource_group_name = azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "VM1-IPConfig-IPv4"
+    name                          = "VM1-IPv4"
     subnet_id                     = azurerm_subnet.subnet1_dual.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.vm1_ipv4.id
     primary                       = false
   }
 
   ip_configuration {
-    name                          = "VM1-IPConfig-IPv6"
+    name                          = "VM1-IPv6"
     subnet_id                     = azurerm_subnet.subnet1_dual.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm1_ipv6.id
@@ -94,14 +113,15 @@ resource "azurerm_network_interface" "vm2_nic" {
   resource_group_name = azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "VM2-IPConfig-IPv4"
+    name                          = "VM2-IPv4"
     subnet_id                     = azurerm_subnet.subnet2_dual.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.vm2_ipv4.id
     primary                       = false
   }
 
   ip_configuration {
-    name                          = "VM2-IPConfig-IPv6"
+    name                          = "VM2-IPv6"
     subnet_id                     = azurerm_subnet.subnet2_dual.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm2_ipv6.id
