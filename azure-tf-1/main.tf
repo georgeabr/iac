@@ -13,7 +13,21 @@ provider "azurerm" {
   subscription_id = var.azure_subscription_id
 }
 
-# Variable definitions have been moved to variables.tf
+# Define variables for user-specific values
+variable "azure_subscription_id" {
+  description = "The Azure Subscription ID to deploy resources into."
+  type        = string
+  # You should set this via a CI/CD variable or environment variable
+  # default     = "YOUR_AZURE_SUBSCRIPTION_ID" # Replace with your Subscription ID or remove default
+}
+
+variable "ssh_public_key" {
+  description = "The SSH public key to use for the Linux VMs."
+  type        = string
+  # You should set this via a CI/CD variable or environment variable
+  # default     = "ssh-rsa AAAAB3Nz..." # Replace with your actual public key or remove default
+}
+
 
 resource "azurerm_resource_group" "rg" {
   name     = "MyResourceGroup"
@@ -380,56 +394,7 @@ resource "azurerm_virtual_network_peering" "vpc2_to_vpc1_peering" {
 # Note: Azure VNet peering automatically creates system routes.
 # Explicitly adding routes below is often not strictly necessary for basic peering
 # but can be helpful for clarity or in complex routing scenarios.
-
-# Add a route in VPC1's route table to send traffic for VPC2's IPv4 CIDR through the peering connection
-resource "azurerm_route" "vpc1_to_vpc2_route_ipv4" {
-  name                   = "vpc1-to-vpc2-route-ipv4"
-  resource_group_name    = azurerm_resource_group.rg.name
-  route_table_name       = azurerm_route_table.rt1.name # Add route to the custom route table
-  address_prefix         = "10.2.0.0/16" # VPC2 IPv4 CIDR
-  next_hop_type          = "VnetLocal" # Corrected: Use VnetLocal for peering routes
-  next_hop_in_ip_address = null # Not needed for VNet Peering
-
-  # Ensure peering is established before adding the route
-  depends_on = [azurerm_virtual_network_peering.vpc1_to_vpc2_peering]
-}
-
-# Add a route in VPC1's route table to send traffic for VPC2's IPv6 CIDR through the peering connection
-resource "azurerm_route" "vpc1_to_vpc2_route_ipv6" {
-  name                   = "vpc1-to-vpc2-route-ipv6"
-  resource_group_name    = azurerm_resource_group.rg.name
-  route_table_name       = azurerm_route_table.rt1.name # Add route to the custom route table
-  address_prefix         = "2001:db8:abcd:0022::/64" # VPC2 IPv6 CIDR
-  next_hop_type          = "VnetLocal" # Corrected: Use VnetLocal for peering routes
-  next_hop_in_ip_address = null # Not needed for VNet Peering
-  # Ensure peering is established before adding the route
-  depends_on = [azurerm_virtual_network_peering.vpc1_to_vpc2_peering]
-}
-
-
-# Add a route in VPC2's route table to send traffic for VPC1's IPv4 CIDR through the peering connection
-resource "azurerm_route" "vpc2_to_vpc1_route_ipv4" {
-  name                   = "vpc2-to-vpc1-route-ipv4"
-  resource_group_name    = azurerm_resource_group.rg.name
-  route_table_name       = azurerm_route_table.rt2.name # Add route to the custom route table
-  address_prefix         = "10.1.0.0/16" # VPC1 IPv4 CIDR
-  next_hop_type          = "VnetLocal" # Corrected: Use VnetLocal for peering routes
-  next_hop_in_ip_address = null # Not needed for VNet Peering
-  # Ensure peering is established before adding the route
-  depends_on = [azurerm_virtual_network_peering.vpc2_to_vpc1_peering] # Dependency updated
-}
-
-# Add a route in VPC2's route table to send traffic for VPC1's IPv6 CIDR through the peering connection
-resource "azurerm_route" "vpc2_to_vpc1_route_ipv6" {
-  name                   = "vpc2-to-vpc1-route-ipv6"
-  resource_group_name    = azurerm_resource_group.rg.name
-  route_table_name       = azurerm_route_table.rt2.name # Add route to the custom route table
-  address_prefix         = "2001:db8:abcd:0012::/64" # VPC1 IPv6 CIDR
-  next_hop_type          = "VnetLocal" # Corrected: Use VnetLocal for peering routes
-  next_hop_in_ip_address = null # Not needed for VNet Peering
-  # Ensure peering is established before adding the route
-  depends_on = [azurerm_virtual_network_peering.vpc2_to_vpc1_peering] # Dependency updated
-}
+# Removed explicit route resources for peering to rely on Azure system routes.
 
 
 # 🔹 Output Public & Private IPv4 and IPv6 Addresses
