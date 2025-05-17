@@ -48,57 +48,41 @@ resource "azurerm_subnet" "subnet2_dual" {
   address_prefixes     = ["10.2.1.0/24", "2001:db8:abcd:0022::/64"]
 }
 
-# 🔹 Network Security Groups (NSGs)
-resource "azurerm_network_security_group" "vm1_nsg" {
-  name                = "VM1-NSG"
+# 🔹 Public IPs for VM1 & VM2
+resource "azurerm_public_ip" "vm1_ipv4" {
+  name                = "vm1-ipv4"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-
-  security_rule {
-    name                       = "AllowSSH"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_address_prefix      = "0.0.0.0/0"  # Consider restricting
-    destination_port_range     = "22"
-  }
-
-  security_rule {
-    name                       = "AllowPing"
-    priority                   = 110
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Icmp"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  ip_version          = "IPv4"
 }
 
-resource "azurerm_network_security_group" "vm2_nsg" {
-  name                = "VM2-NSG"
+resource "azurerm_public_ip" "vm1_ipv6" {
+  name                = "vm1-ipv6"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  ip_version          = "IPv6"
+}
 
-  security_rule {
-    name                       = "AllowSSH"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_address_prefix      = "0.0.0.0/0"  # Consider restricting
-    destination_port_range     = "22"
-  }
+resource "azurerm_public_ip" "vm2_ipv4" {
+  name                = "vm2-ipv4"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  ip_version          = "IPv4"
+}
 
-  security_rule {
-    name                       = "AllowPing"
-    priority                   = 110
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Icmp"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
+resource "azurerm_public_ip" "vm2_ipv6" {
+  name                = "vm2-ipv6"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  ip_version          = "IPv6"
 }
 
 # 🔹 Virtual Machines (Debian 12)
@@ -151,7 +135,6 @@ resource "azurerm_virtual_network_peering" "vpc1_to_vpc2" {
   virtual_network_name         = azurerm_virtual_network.vpc1.name
   remote_virtual_network_id    = azurerm_virtual_network.vpc2.id
   allow_virtual_network_access = true
-  allow_forwarded_traffic      = true
 }
 
 resource "azurerm_virtual_network_peering" "vpc2_to_vpc1" {
@@ -160,10 +143,9 @@ resource "azurerm_virtual_network_peering" "vpc2_to_vpc1" {
   virtual_network_name         = azurerm_virtual_network.vpc2.name
   remote_virtual_network_id    = azurerm_virtual_network.vpc1.id
   allow_virtual_network_access = true
-  allow_forwarded_traffic      = true
 }
 
-# 🔹 Outputs for All IPs
+# 🔹 Outputs for All Public & Private IPs
 output "vm1_public_ipv4" {
   value = azurerm_public_ip.vm1_ipv4.ip_address
 }
