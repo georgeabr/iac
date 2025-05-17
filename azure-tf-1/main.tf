@@ -312,21 +312,42 @@ resource "azurerm_virtual_network_peering" "vpc1_to_vpc2_peering" {
   use_remote_gateways          = false
 }
 
+resource "azurerm_virtual_network_peering" "vpc2_to_vpc1_peering" { # Added missing peering
+  name                         = "vpc2-to-vpc1-peering"
+  resource_group_name          = azurerm_resource_group.rg.name
+  virtual_network_name         = azurerm_virtual_network.vpc2.name
+  remote_virtual_network_id    = azurerm_virtual_network.vpc1.id
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = true
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+}
+
+
 # Note: Azure VNet peering automatically creates system routes.
 # Explicitly adding routes below is often not strictly necessary for basic peering
 # but can be helpful for clarity or in complex routing scenarios.
 
 # Add a route in VPC1's route table to send traffic for VPC2's IPv4 CIDR through the peering connection
+# 🔹 Add Dependencies to Ensure Correct Execution Order
 resource "azurerm_route" "vpc1_to_vpc2_route_ipv4" {
   name                   = "vpc1-to-vpc2-route-ipv4"
   resource_group_name    = azurerm_resource_group.rg.name
-  route_table_name       = azurerm_route_table.rt1.name # Add route to the custom route table
-  address_prefix         = "10.2.0.0/16" # VPC2 IPv4 CIDR
-  next_hop_type          = "VnetLocal" # Corrected: Use VnetLocal for peering routes
-  next_hop_in_ip_address = null # Not needed for VNet Peering
+  route_table_name       = azurerm_route_table.rt1.name
+  address_prefix         = "10.2.0.0/16" 
+  next_hop_type          = "VnetLocal"
+  next_hop_in_ip_address = null
+  depends_on             = [azurerm_virtual_network_peering.vpc1_to_vpc2_peering, azurerm_virtual_network_peering.vpc2_to_vpc1_peering] # Added dependency
+}
 
-  # Ensure peering is established before adding the route
-  depends_on = [azurerm_virtual_network_peering.vpc1_to_vpc2_peering]
+resource "azurerm_route" "vpc2_to_vpc1_route_ipv4" {
+  name                   = "vpc2-to-vpc1-route-ipv4"
+  resource_group_name    = azurerm_resource_group.rg.name
+  route_table_name       = azurerm_route_table.rt2.name
+  address_prefix         = "10.1.0.0/16"
+  next_hop_type          = "VnetLocal"
+  next_hop_in_ip_address = null
+  depends_on             = [azurerm_virtual_network_peering.vpc1_to_vpc2_peering, azurerm_virtual_network_peering.vpc2_to_vpc1_peering] # Added dependency
 }
 
 # Add a route in VPC1's route table to send traffic for VPC2's IPv6 CIDR through the peering connection
