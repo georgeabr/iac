@@ -32,72 +32,22 @@ resource "azurerm_virtual_network" "vpc2" {
   address_space       = ["10.2.0.0/16", "2001:db8:abcd:0022::/64"]  # IPv4 + IPv6
 }
 
-resource "azurerm_subnet" "subnet1" {
-  name                 = "Subnet1"
+# 🔹 Single Dual-Stack Subnet for Each VPC
+resource "azurerm_subnet" "subnet1_dual" {
+  name                 = "Subnet1-DualStack"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vpc1.name
-  address_prefixes     = ["10.1.1.0/24"]
+  address_prefixes     = ["10.1.1.0/24", "2001:db8:abcd:0012::/64"]
 }
 
-resource "azurerm_subnet" "subnet1_ipv6" {
-  name                 = "Subnet1-IPv6"
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vpc1.name
-  address_prefixes     = ["2001:db8:abcd:0012::/64"]
-}
-
-resource "azurerm_subnet" "subnet2" {
-  name                 = "Subnet2"
+resource "azurerm_subnet" "subnet2_dual" {
+  name                 = "Subnet2-DualStack"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vpc2.name
-  address_prefixes     = ["10.2.1.0/24"]
+  address_prefixes     = ["10.2.1.0/24", "2001:db8:abcd:0022::/64"]
 }
 
-resource "azurerm_subnet" "subnet2_ipv6" {
-  name                 = "Subnet2-IPv6"
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vpc2.name
-  address_prefixes     = ["2001:db8:abcd:0022::/64"]
-}
-
-resource "azurerm_virtual_network_peering" "peering1" {
-  name                      = "PeeringBetweenVPCs"
-  resource_group_name       = azurerm_resource_group.rg.name
-  virtual_network_name      = azurerm_virtual_network.vpc1.name
-  remote_virtual_network_id = azurerm_virtual_network.vpc2.id
-}
-
-resource "azurerm_network_security_group" "nsg" {
-  name                = "NSG-Allow-Ping-SSH"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  security_rule {
-    name                       = "AllowPing"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Icmp"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "AllowSSH"
-    priority                   = 110
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-}
-
-# 🔹 IPv6 Public IPs (Primary)
+# 🔹 Public IPv6 for VM1 & VM2
 resource "azurerm_public_ip" "vm1_ipv6" {
   name                = "vm1-ipv6"
   location            = azurerm_resource_group.rg.location
@@ -116,18 +66,25 @@ resource "azurerm_public_ip" "vm2_ipv6" {
   ip_version          = "IPv6"
 }
 
-# 🔹 Network Interfaces for VM1 & VM2 (IPv6 Primary)
+# 🔹 Network Interfaces for VM1 & VM2 (Dual-Stack, IPv6 Primary)
 resource "azurerm_network_interface" "vm1_nic" {
   name                = "VM1-NIC"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
   ip_configuration {
+    name                          = "VM1-IPConfig-IPv4"
+    subnet_id                     = azurerm_subnet.subnet1_dual.id
+    private_ip_address_allocation = "Dynamic"
+    primary                       = false
+  }
+
+  ip_configuration {
     name                          = "VM1-IPConfig-IPv6"
-    subnet_id                     = azurerm_subnet.subnet1_ipv6.id
+    subnet_id                     = azurerm_subnet.subnet1_dual.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm1_ipv6.id
-    primary                       = true  # IPv6 as primary
+    primary                       = true  # 🔹 IPv6 as primary
   }
 }
 
@@ -137,11 +94,73 @@ resource "azurerm_network_interface" "vm2_nic" {
   resource_group_name = azurerm_resource_group.rg.name
 
   ip_configuration {
+    name                          = "VM2-IPConfig-IPv4"
+    subnet_id                     = azurerm_subnet.subnet2_dual.id
+    private_ip_address_allocation = "Dynamic"
+    primary                       = false
+  }
+
+  ip_configuration {
     name                          = "VM2-IPConfig-IPv6"
-    subnet_id                     = azurerm_subnet.subnet2_ipv6.id
+    subnet_id                     = azurerm_subnet.subnet2_dual.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm2_ipv6.id
-    primary                       = true  # IPv6 as primary
+    primary                       = true  # 🔹 IPv6 as primary
+  }
+}
+
+# 🔹 Virtual Machines (Debian Linux)
+resource "azurerm_linux_virtual_machine" "vm1" {
+  name                  = "VM1"
+  location              = azurerm_resource_group.rg.location
+  resource_group_name   = azurerm_resource_group.rg.name
+  size                  = "Standard_B1s"
+  admin_username        = "azureuser"
+  network_interface_ids = [azurerm_network_interface.vm1_nic.id]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    disk_size_gb         = 30  # 30GB Disk
+  }
+
+  source_image_reference {
+    publisher = "Debian"
+    offer     = "debian-12"
+    sku       = "12"
+    version   = "latest"
+  }
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = var.ssh_public_key
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "vm2" {
+  name                  = "VM2"
+  location              = azurerm_resource_group.rg.location
+  resource_group_name   = azurerm_resource_group.rg.name
+  size                  = "Standard_B1s"
+  admin_username        = "azureuser"
+  network_interface_ids = [azurerm_network_interface.vm2_nic.id]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    disk_size_gb         = 30  # 30GB Disk
+  }
+
+  source_image_reference {
+    publisher = "Debian"
+    offer     = "debian-12"
+    sku       = "12"
+    version   = "latest"
+  }
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = var.ssh_public_key
   }
 }
 
