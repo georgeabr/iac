@@ -65,6 +65,7 @@ resource "azurerm_network_security_group" "nsg" {
     access                     = "Allow"
     protocol                   = "Icmp"
     source_port_range          = "*"  # 🔹 Fix: Required for ICMP rules
+    destination_port_range     = "*"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
