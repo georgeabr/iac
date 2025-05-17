@@ -84,7 +84,7 @@ resource "azurerm_public_ip" "vm2_ipv6" {
   ip_version          = "IPv6"
 }
 
-# 🔹 Network Interfaces for VM1 & VM2 (Dual-Stack, IPv6 Primary)
+# 🔹 Network Interfaces for VM1 & VM2 (Dual-Stack)
 resource "azurerm_network_interface" "vm1_nic" {
   name                = "VM1-NIC"
   location            = azurerm_resource_group.rg.location
@@ -95,8 +95,8 @@ resource "azurerm_network_interface" "vm1_nic" {
     subnet_id                     = azurerm_subnet.subnet1_dual.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm1_ipv4.id
-    primary                       = false
-    private_ip_address_version    = "IPv4" # Added: Explicitly set IP version
+    primary                       = true  # Corrected: IPv4 must be primary
+    private_ip_address_version    = "IPv4"
   }
 
   ip_configuration {
@@ -104,8 +104,8 @@ resource "azurerm_network_interface" "vm1_nic" {
     subnet_id                     = azurerm_subnet.subnet1_dual.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm1_ipv6.id
-    primary                       = true  # 🔹 IPv6 as primary
-    private_ip_address_version    = "IPv6" # Added: Explicitly set IP version
+    primary                       = false # Corrected: IPv6 cannot be primary
+    private_ip_address_version    = "IPv6"
   }
 }
 
@@ -119,8 +119,8 @@ resource "azurerm_network_interface" "vm2_nic" {
     subnet_id                     = azurerm_subnet.subnet2_dual.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm2_ipv4.id
-    primary                       = false
-    private_ip_address_version    = "IPv4" # Added: Explicitly set IP version
+    primary                       = true  # Corrected: IPv4 must be primary
+    private_ip_address_version    = "IPv4"
   }
 
   ip_configuration {
@@ -128,8 +128,8 @@ resource "azurerm_network_interface" "vm2_nic" {
     subnet_id                     = azurerm_subnet.subnet2_dual.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm2_ipv6.id
-    primary                       = true  # 🔹 IPv6 as primary
-    private_ip_address_version    = "IPv6" # Added: Explicitly set IP version
+    primary                       = false # Corrected: IPv6 cannot be primary
+    private_ip_address_version    = "IPv6"
   }
 }
 
