@@ -112,7 +112,7 @@ resource "azurerm_network_security_group" "vm1_nsg" {
     protocol                   = "Icmp"
     source_port_range          = "*"
     destination_port_range     = "*"
-    source_address_prefix      = "10.2.0.0/16" # Corrected: Use literal IPv4 CIDR
+    source_address_prefix      = "*" # From anywhere
     destination_address_prefix = "*"
   }
 }
