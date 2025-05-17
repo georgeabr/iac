@@ -13,7 +13,7 @@ provider "azurerm" {
   subscription_id = var.azure_subscription_id
 }
 
-# Variable definitions have been moved to variables.tf
+# Define variables for user-specific values
 # variable "azure_subscription_id" {
 #   description = "The Azure Subscription ID to deploy resources into."
 #   type        = string
@@ -413,9 +413,9 @@ output "vm1_private_ipv4" { # Added: Output for VM1 Private IPv4
   value       = azurerm_network_interface.vm1_nic.ip_configuration[0].private_ip_address # Assuming IPv4 config is the first one
 }
 
-output "vm1_private_ipv6" {
+output "vm1_private_ipv6" { # Corrected: Reference the IPv6 ip_configuration
   description = "Private IPv6 address of VM 1"
-  value = azurerm_network_interface.vm1_nic.private_ip_address
+  value       = azurerm_network_interface.vm1_nic.ip_configuration[1].private_ip_address # Assuming IPv6 config is the second one
 }
 
 output "vm2_public_ipv4" {
@@ -433,7 +433,7 @@ output "vm2_private_ipv4" { # Added: Output for VM2 Private IPv4
   value       = azurerm_network_interface.vm2_nic.ip_configuration[0].private_ip_address # Assuming IPv4 config is the first one
 }
 
-output "vm2_private_ipv6" {
+output "vm2_private_ipv6" { # Corrected: Reference the IPv6 ip_configuration
   description = "Private IPv6 address of VM 2"
-  value = azurerm_network_interface.vm2_nic.private_ip_address
+  value       = azurerm_network_interface.vm2_nic.ip_configuration[1].private_ip_address # Assuming IPv6 config is the second one
 }
