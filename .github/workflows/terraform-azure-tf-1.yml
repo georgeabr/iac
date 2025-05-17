@@ -68,14 +68,6 @@ jobs:
         terraform apply -auto-approve -var="azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
                         -var="ssh_public_key=${{ secrets.AZURE_SSH_PUBLIC_KEY_1 }}" \
 
-    - name: Print VM IP Addresses
-      run: |
-        cd azure-tf-1
-        echo "VM 1 Public IP: $(terraform output vm1_public_ip)"
-        echo "VM 1 Private IP: $(terraform output vm1_private_ip)"
-        echo "VM 2 Public IP: $(terraform output vm2_public_ip)"
-        echo "VM 2 Private IP: $(terraform output vm2_private_ip)"
-
   terraform_destroy:
     name: Terraform Destroy for Azure
     runs-on: ubuntu-latest
