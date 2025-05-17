@@ -22,7 +22,14 @@ resource "azurerm_virtual_network" "vpc1" {
   name                = "VPC1"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  address_space       = ["10.1.0.0/16", "2001:db8:abcd:0012::/64"]  # IPv4 + IPv6
+  address_space       = ["10.1.0.0/16"]
+}
+
+resource "azurerm_virtual_network" "vpc2" {
+  name                = "VPC2"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  address_space       = ["10.2.0.0/16"]
 }
 
 resource "azurerm_subnet" "subnet1" {
@@ -32,11 +39,18 @@ resource "azurerm_subnet" "subnet1" {
   address_prefixes     = ["10.1.1.0/24"]
 }
 
-resource "azurerm_subnet" "subnet1_ipv6" {
-  name                 = "Subnet1-IPv6"
+resource "azurerm_subnet" "subnet2" {
+  name                 = "Subnet2"
   resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vpc1.name
-  address_prefixes     = ["2001:db8:abcd:0012::/64"]
+  virtual_network_name = azurerm_virtual_network.vpc2.name
+  address_prefixes     = ["10.2.1.0/24"]
+}
+
+resource "azurerm_virtual_network_peering" "peering1" {
+  name                      = "PeeringBetweenVPCs"
+  resource_group_name       = azurerm_resource_group.rg.name
+  virtual_network_name      = azurerm_virtual_network.vpc1.name
+  remote_virtual_network_id = azurerm_virtual_network.vpc2.id
 }
 
 resource "azurerm_network_security_group" "nsg" {
@@ -50,7 +64,7 @@ resource "azurerm_network_security_group" "nsg" {
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Icmp"
-    source_port_range          = "*"  # Required for ICMP rules
+    source_port_range          = "*"  # 🔹 Fix: Required for ICMP rules
     destination_port_range     = "*"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
@@ -62,60 +76,67 @@ resource "azurerm_network_security_group" "nsg" {
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
-    source_port_range          = "*"  
-    destination_port_range     = "22"
+    source_port_range          = "*"  # 🔹 Fix: Defined Source Port
     source_address_prefix      = "*"
+    destination_port_range     = "22"
     destination_address_prefix = "*"
   }
 }
 
-# 🔹 Public IPv4 + IPv6 for VM
-resource "azurerm_public_ip" "vm1_ipv4" {
-  name                = "vm1-ipv4"
+# 🔹 Public IPs for VM1 & VM2
+resource "azurerm_public_ip" "vm1_public_ip" {
+  name                = "vm1-public-ip"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   allocation_method   = "Static"
-  sku                 = "Standard"
-  ip_version          = "IPv4"
 }
 
-resource "azurerm_public_ip" "vm1_ipv6" {
-  name                = "vm1-ipv6"
+resource "azurerm_public_ip" "vm2_public_ip" {
+  name                = "vm2-public-ip"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   allocation_method   = "Static"
-  sku                 = "Standard"
-  ip_version          = "IPv6"
 }
 
-# 🔹 Network Interface
+# 🔹 Network Interfaces for VM1 & VM2
 resource "azurerm_network_interface" "vm1_nic" {
   name                = "VM1-NIC"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
   ip_configuration {
-    name                          = "VM1-IPConfig-IPv4"
+    name                          = "VM1-IPConfig"
     subnet_id                     = azurerm_subnet.subnet1.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.vm1_ipv4.id
-  }
-
-  ip_configuration {
-    name                          = "VM1-IPConfig-IPv6"
-    subnet_id                     = azurerm_subnet.subnet1_ipv6.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.vm1_ipv6.id
+    public_ip_address_id          = azurerm_public_ip.vm1_public_ip.id
   }
 }
 
-# 🔹 Attach NSG to NIC
+resource "azurerm_network_interface" "vm2_nic" {
+  name                = "VM2-NIC"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "VM2-IPConfig"
+    subnet_id                     = azurerm_subnet.subnet2.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.vm2_public_ip.id
+  }
+}
+
+# 🔹 Attach NSG to NICs
 resource "azurerm_network_interface_security_group_association" "vm1_nsg_assoc" {
   network_interface_id      = azurerm_network_interface.vm1_nic.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
-# 🔹 VM Configuration
+resource "azurerm_network_interface_security_group_association" "vm2_nsg_assoc" {
+  network_interface_id      = azurerm_network_interface.vm2_nic.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+# 🔹 Virtual Machines
 resource "azurerm_linux_virtual_machine" "vm1" {
   name                  = "VM1"
   location              = azurerm_resource_group.rg.location
@@ -127,7 +148,32 @@ resource "azurerm_linux_virtual_machine" "vm1" {
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
-    disk_size_gb         = 30  # 30GB Disk
+  }
+
+  source_image_reference {
+    publisher = "Debian"
+    offer     = "debian-12"
+    sku       = "12"
+    version   = "latest"
+  }
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = var.ssh_public_key
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "vm2" {
+  name                  = "VM2"
+  location              = azurerm_resource_group.rg.location
+  resource_group_name   = azurerm_resource_group.rg.name
+  size                  = "Standard_B1s"
+  admin_username        = "azureuser"
+  network_interface_ids = [azurerm_network_interface.vm2_nic.id]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
   }
 
   source_image_reference {
@@ -144,18 +190,18 @@ resource "azurerm_linux_virtual_machine" "vm1" {
 }
 
 # 🔹 Output Public & Private IPs
-output "vm1_public_ipv4" {
-  value = azurerm_public_ip.vm1_ipv4.ip_address
+output "vm1_public_ip" {
+  value = azurerm_public_ip.vm1_public_ip.ip_address
 }
 
-output "vm1_private_ipv4" {
+output "vm1_private_ip" {
   value = azurerm_network_interface.vm1_nic.private_ip_address
 }
 
-output "vm1_public_ipv6" {
-  value = azurerm_public_ip.vm1_ipv6.ip_address
+output "vm2_public_ip" {
+  value = azurerm_public_ip.vm2_public_ip.ip_address
 }
 
-output "vm1_private_ipv6" {
-  value = azurerm_network_interface.vm1_nic.private_ip_address
+output "vm2_private_ip" {
+  value = azurerm_network_interface.vm2_nic.private_ip_address
 }
