@@ -13,20 +13,20 @@ provider "azurerm" {
   subscription_id = var.azure_subscription_id
 }
 
-# Define variables for user-specific values
-variable "azure_subscription_id" {
-  description = "The Azure Subscription ID to deploy resources into."
-  type        = string
-  # You should set this via a CI/CD variable or environment variable
-  # default     = "YOUR_AZURE_SUBSCRIPTION_ID" # Replace with your Subscription ID or remove default
-}
+# Variable definitions have been moved to variables.tf
+# variable "azure_subscription_id" {
+#   description = "The Azure Subscription ID to deploy resources into."
+#   type        = string
+#   # You should set this via a CI/CD variable or environment variable
+#   # default     = "YOUR_AZURE_SUBSCRIPTION_ID" # Replace with your Subscription ID or remove default
+# }
 
-variable "ssh_public_key" {
-  description = "The SSH public key to use for the Linux VMs."
-  type        = string
-  # You should set this via a CI/CD variable or environment variable
-  # default     = "ssh-rsa AAAAB3Nz..." # Replace with your actual public key or remove default
-}
+# variable "ssh_public_key" {
+#   description = "The SSH public key to use for the Linux VMs."
+#   type        = string
+#   # You should set this via a CI/CD variable or environment variable
+#   # default     = "ssh-rsa AAAAB3Nz..." # Replace with your actual public key or remove default
+# }
 
 
 resource "azurerm_resource_group" "rg" {
