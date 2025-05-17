@@ -4,13 +4,12 @@ terraform {
     storage_account_name = "myterraformstategit1"
     container_name       = "terraform-state"
     key                 = "terraform-azure-tf-333333.tfstate"
-    use_azuread_auth     = true  # Enables authentication via Azure AD
+    use_azuread_auth     = true
   }
 }
 
 provider "azurerm" {
   features {}
-
   subscription_id = var.azure_subscription_id
 }
 
@@ -81,7 +80,7 @@ resource "azurerm_network_security_group" "nsg" {
   }
 }
 
-# Assign Public IPs to Both VMs
+# 🔹 Public IPs for VM1 & VM2
 resource "azurerm_public_ip" "vm1_public_ip" {
   name                = "vm1-public-ip"
   location            = azurerm_resource_group.rg.location
@@ -96,6 +95,7 @@ resource "azurerm_public_ip" "vm2_public_ip" {
   allocation_method   = "Static"
 }
 
+# 🔹 Network Interfaces for VM1 & VM2
 resource "azurerm_network_interface" "vm1_nic" {
   name                = "VM1-NIC"
   location            = azurerm_resource_group.rg.location
@@ -107,14 +107,6 @@ resource "azurerm_network_interface" "vm1_nic" {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm1_public_ip.id
   }
-
-# Add NSG Association Here (After NIC Definition, Before VM Resources)
-resource "azurerm_network_interface_security_group_association" "vm2_nsg_assoc" {
-  network_interface_id      = azurerm_network_interface.vm2_nic.id
-  network_security_group_id = azurerm_network_security_group.nsg.id
-}
-
-
 }
 
 resource "azurerm_network_interface" "vm2_nic" {
@@ -128,15 +120,20 @@ resource "azurerm_network_interface" "vm2_nic" {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.vm2_public_ip.id
   }
+}
 
-# Add NSG Association Here (After NIC Definition, Before VM Resources)
+# 🔹 Attach NSG to NICs
+resource "azurerm_network_interface_security_group_association" "vm1_nsg_assoc" {
+  network_interface_id      = azurerm_network_interface.vm1_nic.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
 resource "azurerm_network_interface_security_group_association" "vm2_nsg_assoc" {
   network_interface_id      = azurerm_network_interface.vm2_nic.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
-}
-
+# 🔹 Virtual Machines
 resource "azurerm_linux_virtual_machine" "vm1" {
   name                  = "VM1"
   location              = azurerm_resource_group.rg.location
@@ -189,7 +186,7 @@ resource "azurerm_linux_virtual_machine" "vm2" {
   }
 }
 
-# Output Public and Private IPs
+# 🔹 Output Public & Private IPs
 output "vm1_public_ip" {
   value = azurerm_public_ip.vm1_public_ip.ip_address
 }
