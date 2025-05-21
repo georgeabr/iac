@@ -1,4 +1,4 @@
-name: Deploy and Destroy Azure Terraform
+name: Azure Terraform CI/CD
 
 on:
   push:
