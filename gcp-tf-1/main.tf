@@ -218,7 +218,6 @@ resource "google_compute_firewall" "vpc2_allow_icmp_internet_ipv4" { # New rule 
 
 resource "google_compute_firewall" "vpc2_allow_icmp_internet_ipv6" { # New rule for IPv6 ICMP
   name    = "vpc2-allow-icmp-internet-ipv6"
-  network = google_compute_network.vpc2.name
   direction = "INGRESS"
   source_ranges = ["::/0"]
   allow {
@@ -302,7 +301,7 @@ resource "google_compute_instance" "vm1" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11" # Using Debian 11 as a base image
+      image = "debian-cloud/debian-12" # Changed to Debian 12
     }
   }
 
@@ -340,7 +339,7 @@ resource "google_compute_instance" "vm2" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11" # Using Debian 11 as a base image
+      image = "debian-cloud/debian-12" # Changed to Debian 12
     }
   }
 
@@ -370,12 +369,18 @@ resource "google_compute_instance" "vm2" {
   ]
 }
 
-# 🔹 VPC Peering between VPC1 and VPC2
-# GCP VPC peering is bidirectional by default, so only one resource is needed
-resource "google_compute_network_peering" "vpc_peering" {
-  name         = "vpc1-vpc2-peering"
+# 🔹 VPC Peering from VPC1 to VPC2
+resource "google_compute_network_peering" "vpc1_to_vpc2_peering" {
+  name         = "vpc1-to-vpc2-peering"
   network      = google_compute_network.vpc1.self_link
   peer_network = google_compute_network.vpc2.self_link
+}
+
+# 🔹 VPC Peering from VPC2 to VPC1 (Added for explicit bidirectional setup)
+resource "google_compute_network_peering" "vpc2_to_vpc1_peering" {
+  name         = "vpc2-to-vpc1-peering"
+  network      = google_compute_network.vpc2.self_link
+  peer_network = google_compute_network.vpc1.self_link
 }
 
 # 🔹 Outputs
@@ -408,4 +413,3 @@ output "vm2_private_ipv4" {
 
 # Removed vm2_private_ipv6 output as ipv6_internal_ip_address is not a valid attribute.
 # GCP instances do not expose their internal IPv6 address as a direct attribute.
- 
