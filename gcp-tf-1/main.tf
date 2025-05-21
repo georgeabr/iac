@@ -108,54 +108,87 @@ resource "google_compute_address" "vm2_ipv4_external" {
   address_type = "EXTERNAL"
 }
 
-# 🔹 Firewall Rules for VPC1 (Firewall rules are global resources, but apply to networks)
+# 🔹 Firewall Rules for VPC1
 resource "google_compute_firewall" "vpc1_allow_ssh" {
   name    = "vpc1-allow-ssh"
   network = google_compute_network.vpc1.name
   direction = "INGRESS"
   source_ranges = ["0.0.0.0/0"]
-  allow { # Corrected: changed 'allows' to 'allow'
+  allow {
     protocol = "tcp"
     ports    = ["22"]
   }
   target_tags = ["vm1-tag"] # Apply to VMs with this tag
 }
 
-resource "google_compute_firewall" "vpc1_allow_icmp_internet" {
-  name    = "vpc1-allow-icmp-internet"
+resource "google_compute_firewall" "vpc1_allow_icmp_internet_ipv4" { # New rule for IPv4 ICMP
+  name    = "vpc1-allow-icmp-internet-ipv4"
   network = google_compute_network.vpc1.name
   direction = "INGRESS"
-  source_ranges = ["0.0.0.0/0", "::/0"] # Allow ICMP from any IPv4 or IPv6 source
-  allow { # Corrected: changed 'allows' to 'allow'
+  source_ranges = ["0.0.0.0/0"]
+  allow {
     protocol = "icmp"
   }
   target_tags = ["vm1-tag"]
 }
 
-resource "google_compute_firewall" "vpc1_allow_icmp_from_vpc2" {
-  name    = "vpc1-allow-icmp-from-vpc2"
+resource "google_compute_firewall" "vpc1_allow_icmp_internet_ipv6" { # New rule for IPv6 ICMP
+  name    = "vpc1-allow-icmp-internet-ipv6"
   network = google_compute_network.vpc1.name
   direction = "INGRESS"
-  # Allow ICMP from VPC2's IPv4 and IPv6 CIDRs (using subnet CIDR blocks)
-  source_ranges = [google_compute_subnetwork.subnet2_dual.ip_cidr_range, google_compute_subnetwork.subnet2_dual.ipv6_cidr_range] # Corrected: Use subnet CIDR blocks
-  allow { # Corrected: changed 'allows' to 'allow'
+  source_ranges = ["::/0"]
+  allow {
     protocol = "icmp"
   }
   target_tags = ["vm1-tag"]
 }
 
-resource "google_compute_firewall" "vpc1_allow_ssh_from_vpc2" {
-  name    = "vpc1-allow-ssh-from-vpc2"
+resource "google_compute_firewall" "vpc1_allow_icmp_from_vpc2_ipv4" { # New rule for IPv4 ICMP from VPC2
+  name    = "vpc1-allow-icmp-from-vpc2-ipv4"
   network = google_compute_network.vpc1.name
   direction = "INGRESS"
-  # Allow SSH from VPC2's IPv4 and IPv6 CIDRs (using subnet CIDR blocks)
-  source_ranges = [google_compute_subnetwork.subnet2_dual.ip_cidr_range, google_compute_subnetwork.subnet2_dual.ipv6_cidr_range] # Corrected: Use subnet CIDR blocks
-  allow { # Corrected: changed 'allows' to 'allow'
+  source_ranges = [google_compute_subnetwork.subnet2_dual.ip_cidr_range] # Corrected: Use subnet IPv4 CIDR
+  allow {
+    protocol = "icmp"
+  }
+  target_tags = ["vm1-tag"]
+}
+
+resource "google_compute_firewall" "vpc1_allow_icmp_from_vpc2_ipv6" { # New rule for IPv6 ICMP from VPC2
+  name    = "vpc1-allow-icmp-from-vpc2-ipv6"
+  network = google_compute_network.vpc1.name
+  direction = "INGRESS"
+  source_ranges = [google_compute_subnetwork.subnet2_dual.ipv6_cidr_range] # Corrected: Use subnet IPv6 CIDR
+  allow {
+    protocol = "icmp"
+  }
+  target_tags = ["vm1-tag"]
+}
+
+resource "google_compute_firewall" "vpc1_allow_ssh_from_vpc2_ipv4" { # New rule for IPv4 SSH from VPC2
+  name    = "vpc1-allow-ssh-from-vpc2-ipv4"
+  network = google_compute_network.vpc1.name
+  direction = "INGRESS"
+  source_ranges = [google_compute_subnetwork.subnet2_dual.ip_cidr_range] # Corrected: Use subnet IPv4 CIDR
+  allow {
     protocol = "tcp"
     ports    = ["22"]
   }
   target_tags = ["vm1-tag"]
 }
+
+resource "google_compute_firewall" "vpc1_allow_ssh_from_vpc2_ipv6" { # New rule for IPv6 SSH from VPC2
+  name    = "vpc1-allow-ssh-from-vpc2-ipv6"
+  network = google_compute_network.vpc1.name
+  direction = "INGRESS"
+  source_ranges = [google_compute_subnetwork.subnet2_dual.ipv6_cidr_range] # Corrected: Use subnet IPv6 CIDR
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+  target_tags = ["vm1-tag"]
+}
+
 
 # 🔹 Firewall Rules for VPC2
 resource "google_compute_firewall" "vpc2_allow_ssh" {
@@ -163,43 +196,75 @@ resource "google_compute_firewall" "vpc2_allow_ssh" {
   network = google_compute_network.vpc2.name
   direction = "INGRESS"
   source_ranges = ["0.0.0.0/0"]
-  allow { # Corrected: changed 'allows' to 'allow'
+  allow {
     protocol = "tcp"
     ports    = ["22"]
   }
   target_tags = ["vm2-tag"] # Apply to VMs with this tag
 }
 
-resource "google_compute_firewall" "vpc2_allow_icmp_internet" {
-  name    = "vpc2-allow-icmp-internet"
+resource "google_compute_firewall" "vpc2_allow_icmp_internet_ipv4" { # New rule for IPv4 ICMP
+  name    = "vpc2-allow-icmp-internet-ipv4"
   network = google_compute_network.vpc2.name
   direction = "INGRESS"
-  source_ranges = ["0.0.0.0/0", "::/0"] # Allow ICMP from any IPv4 or IPv6 source
-  allow { # Corrected: changed 'allows' to 'allow'
+  source_ranges = ["0.0.0.0/0"]
+  allow {
     protocol = "icmp"
   }
   target_tags = ["vm2-tag"]
 }
 
-resource "google_compute_firewall" "vpc2_allow_icmp_from_vpc1" {
-  name    = "vpc2-allow-icmp-from-vpc1"
+resource "google_compute_firewall" "vpc2_allow_icmp_internet_ipv6" { # New rule for IPv6 ICMP
+  name    = "vpc2-allow-icmp-internet-ipv6"
   network = google_compute_network.vpc2.name
   direction = "INGRESS"
-  # Allow ICMP from VPC1's IPv4 and IPv6 CIDRs (using subnet CIDR blocks)
-  source_ranges = [google_compute_subnetwork.subnet1_dual.ip_cidr_range, google_compute_subnetwork.subnet1_dual.ipv6_cidr_range] # Corrected: Use subnet CIDR blocks
-  allow { # Corrected: changed 'allows' to 'allow'
+  source_ranges = ["::/0"]
+  allow {
     protocol = "icmp"
   }
   target_tags = ["vm2-tag"]
 }
 
-resource "google_compute_firewall" "vpc2_allow_ssh_from_vpc1" {
-  name    = "vpc2-allow-ssh-from-vpc1"
+resource "google_compute_firewall" "vpc2_allow_icmp_from_vpc1_ipv4" { # New rule for IPv4 ICMP from VPC1
+  name    = "vpc2-allow-icmp-from-vpc1-ipv4"
   network = google_compute_network.vpc2.name
   direction = "INGRESS"
-  # Allow SSH from VPC1's IPv4 and IPv6 CIDRs (using subnet CIDR blocks)
-  source_ranges = [google_compute_subnetwork.subnet1_dual.ip_cidr_range, google_compute_subnetwork.subnet1_dual.ipv6_cidr_range] # Corrected: Use subnet CIDR blocks
-  allow { # Corrected: changed 'allows' to 'allow'
+  source_ranges = [google_compute_subnetwork.subnet1_dual.ip_cidr_range] # Corrected: Use subnet IPv4 CIDR
+  allow {
+    protocol = "icmp"
+  }
+  target_tags = ["vm2-tag"]
+}
+
+resource "google_compute_firewall" "vpc2_allow_icmp_from_vpc1_ipv6" { # New rule for IPv6 ICMP from VPC1
+  name    = "vpc2-allow-icmp-from-vpc1-ipv6"
+  network = google_compute_network.vpc2.name
+  direction = "INGRESS"
+  source_ranges = [google_compute_subnetwork.subnet1_dual.ipv6_cidr_range] # Corrected: Use subnet IPv6 CIDR
+  allow {
+    protocol = "icmp"
+  }
+  target_tags = ["vm2-tag"]
+}
+
+resource "google_compute_firewall" "vpc2_allow_ssh_from_vpc1_ipv4" { # New rule for IPv4 SSH from VPC1
+  name    = "vpc2-allow-ssh-from-vpc1-ipv4"
+  network = google_compute_network.vpc2.name
+  direction = "INGRESS"
+  source_ranges = [google_compute_subnetwork.subnet1_dual.ip_cidr_range] # Corrected: Use subnet IPv4 CIDR
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+  target_tags = ["vm2-tag"]
+}
+
+resource "google_compute_firewall" "vpc2_allow_ssh_from_vpc1_ipv6" { # New rule for IPv6 SSH from VPC1
+  name    = "vpc2-allow-ssh-from-vpc1-ipv6"
+  network = google_compute_network.vpc2.name
+  direction = "INGRESS"
+  source_ranges = [google_compute_subnetwork.subnet1_dual.ipv6_cidr_range] # Corrected: Use subnet IPv6 CIDR
+  allow {
     protocol = "tcp"
     ports    = ["22"]
   }
@@ -228,7 +293,7 @@ resource "google_compute_instance" "vm1" {
     }
     # Enable IPv6 on the network interface
     ipv6_access_config {
-      network_tier = "STANDARD" # Corrected: Added required network_tier
+      network_tier = "STANDARD"
     }
   }
 
@@ -237,6 +302,9 @@ resource "google_compute_instance" "vm1" {
   }
 
   tags = ["vm1-tag"] # Apply tag for firewall rules
+
+  # Ensure subnet is fully configured before creating the instance
+  depends_on = [google_compute_subnetwork.subnet1_dual]
 }
 
 # 🔹 VM Instance 2
@@ -261,7 +329,7 @@ resource "google_compute_instance" "vm2" {
     }
     # Enable IPv6 on the network interface
     ipv6_access_config {
-      network_tier = "STANDARD" # Corrected: Added required network_tier
+      network_tier = "STANDARD"
     }
   }
 
@@ -270,6 +338,9 @@ resource "google_compute_instance" "vm2" {
   }
 
   tags = ["vm2-tag"] # Apply tag for firewall rules
+
+  # Ensure subnet is fully configured before creating the instance
+  depends_on = [google_compute_subnetwork.subnet2_dual]
 }
 
 # 🔹 VPC Peering between VPC1 and VPC2
