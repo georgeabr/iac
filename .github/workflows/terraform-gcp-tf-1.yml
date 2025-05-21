@@ -61,7 +61,8 @@ jobs:
       # Navigate to your Terraform root directory (gcp-tf-1) before running commands
       run: |
         cd gcp-tf-1
-        terraform plan -no-color
+        # Pass the SSH public key to Terraform using the -var option for plan.
+        terraform plan -no-color -var="ssh_public_key=${{ env.SSH_PUBLIC_KEY }}"
 
     # This step will run if the job is triggered (either by push or manual apply)
     - name: Terraform Apply
