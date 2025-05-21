@@ -68,8 +68,8 @@ resource "azurerm_public_ip" "vm1_ipv4" {
   name                = "vm1-ipv4"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Static"
-  sku                 = "Standard" # Keeping IPv4 as Standard
+  allocation_method   = "Static" # Keeping IPv4 as Static
+  sku                 = "Standard"
   ip_version          = "IPv4"
 }
 
@@ -77,8 +77,8 @@ resource "azurerm_public_ip" "vm1_ipv6" {
   name                = "vm1-ipv6"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Static"
-  sku                 = "Basic" # Corrected: Changed SKU to Basic for public IPv6
+  allocation_method   = "Dynamic" # Corrected: Changed allocation_method to Dynamic for IPv6
+  sku                 = "Basic"
   ip_version          = "IPv6"
 }
 
@@ -86,8 +86,8 @@ resource "azurerm_public_ip" "vm2_ipv4" {
   name                = "vm2-ipv4"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Static"
-  sku                 = "Standard" # Keeping IPv4 as Standard
+  allocation_method   = "Static" # Keeping IPv4 as Static
+  sku                 = "Standard"
   ip_version          = "IPv4"
 }
 
@@ -95,8 +95,8 @@ resource "azurerm_public_ip" "vm2_ipv6" {
   name                = "vm2-ipv6"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Static"
-  sku                 = "Basic" # Corrected: Changed SKU to Basic for public IPv6
+  allocation_method   = "Dynamic" # Corrected: Changed allocation_method to Dynamic for IPv6
+  sku                 = "Basic"
   ip_version          = "IPv6"
 }
 
