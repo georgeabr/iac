@@ -138,7 +138,7 @@ resource "google_compute_firewall" "vpc1_allow_icmp_internet_ipv6" { # New rule 
   direction = "INGRESS"
   source_ranges = ["::/0"]
   allow {
-    protocol = "icmp"
+    protocol = "icmpv6" # Corrected: Use icmpv6 for IPv6
   }
   target_tags = ["vm1-tag"]
 }
@@ -160,9 +160,10 @@ resource "google_compute_firewall" "vpc1_allow_icmp_from_vpc2_ipv6" { # New rule
   direction = "INGRESS"
   source_ranges = [google_compute_subnetwork.subnet2_dual.ipv6_cidr_range] # Corrected: Use subnet IPv6 CIDR
   allow {
-    protocol = "icmp"
+    protocol = "icmpv6" # Corrected: Use icmpv6 for IPv6
   }
   target_tags = ["vm1-tag"]
+  depends_on = [google_compute_subnetwork.subnet2_dual] # Explicit dependency for IPv6 CIDR
 }
 
 resource "google_compute_firewall" "vpc1_allow_ssh_from_vpc2_ipv4" { # New rule for IPv4 SSH from VPC2
@@ -187,6 +188,7 @@ resource "google_compute_firewall" "vpc1_allow_ssh_from_vpc2_ipv6" { # New rule 
     ports    = ["22"]
   }
   target_tags = ["vm1-tag"]
+  depends_on = [google_compute_subnetwork.subnet2_dual] # Explicit dependency for IPv6 CIDR
 }
 
 
@@ -220,7 +222,7 @@ resource "google_compute_firewall" "vpc2_allow_icmp_internet_ipv6" { # New rule 
   direction = "INGRESS"
   source_ranges = ["::/0"]
   allow {
-    protocol = "icmp"
+    protocol = "icmpv6" # Corrected: Use icmpv6 for IPv6
   }
   target_tags = ["vm2-tag"]
 }
@@ -242,9 +244,10 @@ resource "google_compute_firewall" "vpc2_allow_icmp_from_vpc1_ipv6" { # New rule
   direction = "INGRESS"
   source_ranges = [google_compute_subnetwork.subnet1_dual.ipv6_cidr_range] # Corrected: Use subnet IPv6 CIDR
   allow {
-    protocol = "icmp"
+    protocol = "icmpv6" # Corrected: Use icmpv6 for IPv6
   }
   target_tags = ["vm2-tag"]
+  depends_on = [google_compute_subnetwork.subnet1_dual] # Explicit dependency for IPv6 CIDR
 }
 
 resource "google_compute_firewall" "vpc2_allow_ssh_from_vpc1_ipv4" { # New rule for IPv4 SSH from VPC1
@@ -269,6 +272,7 @@ resource "google_compute_firewall" "vpc2_allow_ssh_from_vpc1_ipv6" { # New rule 
     ports    = ["22"]
   }
   target_tags = ["vm2-tag"]
+  depends_on = [google_compute_subnetwork.subnet1_dual] # Explicit dependency for IPv6 CIDR
 }
 
 # 🔹 VM Instance 1
