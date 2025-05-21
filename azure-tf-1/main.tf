@@ -77,8 +77,8 @@ resource "azurerm_public_ip" "vm1_ipv6" {
   name                = "vm1-ipv6"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Dynamic" # IPv6 allocation_method must be Dynamic
-  sku                 = "Standard" # Corrected: Changed SKU back to Standard for IPv6
+  allocation_method   = "Static" # Corrected: Changed allocation_method to Static for IPv6 Standard SKU
+  sku                 = "Standard"
   ip_version          = "IPv6"
 }
 
@@ -95,8 +95,8 @@ resource "azurerm_public_ip" "vm2_ipv6" {
   name                = "vm2-ipv6"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Dynamic" # IPv6 allocation_method must be Dynamic
-  sku                 = "Standard" # Corrected: Changed SKU back to Standard for IPv6
+  allocation_method   = "Static" # Corrected: Changed allocation_method to Static for IPv6 Standard SKU
+  sku                 = "Standard"
   ip_version          = "IPv6"
 }
 
