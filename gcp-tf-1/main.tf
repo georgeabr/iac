@@ -275,6 +275,25 @@ resource "google_compute_firewall" "vpc2_allow_ssh_from_vpc1_ipv6" { # New rule 
   depends_on = [google_compute_subnetwork.subnet1_dual] # Explicit dependency for IPv6 CIDR
 }
 
+# --- Time Sleep Resources for IPv6 Propagation ---
+# These resources introduce a delay to allow IPv6 CIDR ranges to fully propagate
+# on the subnets before dependent resources (firewalls, VMs) try to use them.
+resource "time_sleep" "wait_for_subnet1_ipv6" {
+  # This depends on the IPv6 CIDR range being available on subnet1_dual
+  depends_on = [google_compute_subnetwork.subnet1_dual]
+  # Wait for 30 seconds. Adjust as needed based on observed propagation times.
+  create_duration = "30s"
+}
+
+resource "time_sleep" "wait_for_subnet2_ipv6" {
+  # This depends on the IPv6 CIDR range being available on subnet2_dual
+  depends_on = [google_compute_subnetwork.subnet2_dual]
+  # Wait for 30 seconds. Adjust as needed based on observed propagation times.
+  create_duration = "30s"
+}
+# --- End Time Sleep Resources ---
+
+
 # 🔹 VM Instance 1
 resource "google_compute_instance" "vm1" {
   name         = "vm1-instance"
@@ -307,10 +326,11 @@ resource "google_compute_instance" "vm1" {
 
   tags = ["vm1-tag"] # Apply tag for firewall rules
 
-  # Ensure subnet and peering are fully configured before creating the instance
+  # Ensure subnet, peering, and IPv6 propagation are fully configured before creating the instance
   depends_on = [
     google_compute_subnetwork.subnet1_dual,
     google_compute_network_peering.vpc_peering,
+    time_sleep.wait_for_subnet1_ipv6, # Added dependency on time_sleep
   ]
 }
 
@@ -346,10 +366,11 @@ resource "google_compute_instance" "vm2" {
 
   tags = ["vm2-tag"] # Apply tag for firewall rules
 
-  # Ensure subnet and peering are fully configured before creating the instance
+  # Ensure subnet, peering, and IPv6 propagation are fully configured before creating the instance
   depends_on = [
     google_compute_subnetwork.subnet2_dual,
     google_compute_network_peering.vpc_peering,
+    time_sleep.wait_for_subnet2_ipv6, # Added dependency on time_sleep
   ]
 }
 
@@ -397,3 +418,4 @@ output "vm2_private_ipv4" {
 
 # Removed vm2_private_ipv6 output as ipv6_internal_ip_address is not a valid attribute.
 # GCP instances do not expose their internal IPv6 address as a direct attribute.
+
