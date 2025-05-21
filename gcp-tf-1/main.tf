@@ -296,10 +296,8 @@ output "vm1_private_ipv4" {
   value       = google_compute_instance.vm1.network_interface[0].network_ip
 }
 
-output "vm1_private_ipv6" {
-  description = "Private IPv6 address of VM 1"
-  value       = google_compute_instance.vm1.network_interface[0].ipv6_internal_ip_address
-}
+# Removed vm1_private_ipv6 output as ipv6_internal_ip_address is not a valid attribute.
+# GCP instances do not expose their internal IPv6 address as a direct attribute.
 
 output "vm2_public_ipv4" {
   description = "Public IPv4 address of VM 2"
@@ -316,7 +314,5 @@ output "vm2_private_ipv4" {
   value       = google_compute_instance.vm2.network_interface[0].network_ip
 }
 
-output "vm2_private_ipv6" {
-  description = "Private IPv6 address of VM 2"
-  value       = google_compute_instance.vm2.network_interface[0].ipv6_internal_ip_address
-}
+# Removed vm2_private_ipv6 output as ipv6_internal_ip_address is not a valid attribute.
+# GCP instances do not expose their internal IPv6 address as a direct attribute.
