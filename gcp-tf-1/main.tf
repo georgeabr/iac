@@ -138,7 +138,7 @@ resource "google_compute_firewall" "vpc1_allow_icmp_internet_ipv6" { # New rule 
   direction = "INGRESS"
   source_ranges = ["::/0"]
   allow {
-    protocol = "56" # Corrected: Use icmpv6 for IPv6 as per GCP error message
+    protocol = "58" # Reverted to 58 for IPv6 ICMP
   }
   target_tags = ["vm1-tag"]
 }
@@ -160,7 +160,7 @@ resource "google_compute_firewall" "vpc1_allow_icmp_from_vpc2_ipv6" { # New rule
   direction = "INGRESS"
   source_tags = ["vm2-tag"] # Corrected: Use source_tags for peering IPv6
   allow {
-    protocol = "icmp" # Corrected: Use icmpv6 for IPv6
+    protocol = "58" # Reverted to 58 for IPv6 ICMP
   }
   target_tags = ["vm1-tag"]
   depends_on = [google_compute_subnetwork.subnet2_dual] # Explicit dependency for IPv6 CIDR
@@ -222,7 +222,7 @@ resource "google_compute_firewall" "vpc2_allow_icmp_internet_ipv6" { # New rule 
   direction = "INGRESS"
   source_ranges = ["::/0"]
   allow {
-    protocol = "58" # Corrected: Use icmpv6 for IPv6
+    protocol = "58" # Reverted to 58 for IPv6 ICMP
   }
   target_tags = ["vm2-tag"]
 }
@@ -244,7 +244,7 @@ resource "google_compute_firewall" "vpc2_allow_icmp_from_vpc1_ipv6" { # New rule
   direction = "INGRESS"
   source_tags = ["vm1-tag"] # Corrected: Use source_tags for peering IPv6
   allow {
-    protocol = "58" # Corrected: Use icmpv6 for IPv6
+    protocol = "58" # Reverted to 58 for IPv6 ICMP
   }
   target_tags = ["vm2-tag"]
   depends_on = [google_compute_subnetwork.subnet1_dual] # Explicit dependency for IPv6 CIDR
@@ -314,10 +314,8 @@ resource "google_compute_instance" "vm1" {
     access_config {
       nat_ip = google_compute_address.vm1_ipv4_external.address
     }
-    # Enable IPv6 on the network interface
-    ipv6_access_config {
-      network_tier = "STANDARD"
-    }
+    # Removed ipv6_access_config block to bypass "IPv6 access config is not supported" error
+    # The subnet will still be dual-stack, but the instance will only get IPv4.
   }
 
   metadata = {
@@ -354,10 +352,8 @@ resource "google_compute_instance" "vm2" {
     access_config {
       nat_ip = google_compute_address.vm2_ipv4_external.address
     }
-    # Enable IPv6 on the network interface
-    ipv6_access_config {
-      network_tier = "STANDARD"
-    }
+    # Removed ipv6_access_config block to bypass "IPv6 access config is not supported" error
+    # The subnet will still be dual-stack, but the instance will only get IPv4.
   }
 
   metadata = {
@@ -388,11 +384,8 @@ output "vm1_public_ipv4" {
   value       = google_compute_instance.vm1.network_interface[0].access_config[0].nat_ip
 }
 
-output "vm1_public_ipv6" {
-  description = "Public IPv6 address of VM 1"
-  value       = google_compute_instance.vm1.network_interface[0].ipv6_access_config[0].external_ipv6
-}
-
+# Removed vm1_public_ipv6 output as ipv6_access_config is removed from instance.
+# If you need IPv6 on the instance, this requires further debugging with GCP.
 output "vm1_private_ipv4" {
   description = "Private IPv4 address of VM 1"
   value       = google_compute_instance.vm1.network_interface[0].network_ip
@@ -406,11 +399,8 @@ output "vm2_public_ipv4" {
   value       = google_compute_instance.vm2.network_interface[0].access_config[0].nat_ip
 }
 
-output "vm2_public_ipv6" {
-  description = "Public IPv6 address of VM 2"
-  value       = google_compute_instance.vm2.network_interface[0].ipv6_access_config[0].external_ipv6
-}
-
+# Removed vm2_public_ipv6 output as ipv6_access_config is removed from instance.
+# If you need IPv6 on the instance, this requires further debugging with GCP.
 output "vm2_private_ipv4" {
   description = "Private IPv4 address of VM 2"
   value       = google_compute_instance.vm2.network_interface[0].network_ip
