@@ -26,7 +26,7 @@ terraform {
 variable "gcp_project_id" {
   description = "The GCP Project ID to deploy resources into."
   type        = string
-  default     = "neomutt-01" # Updated with provided project ID
+  default      = "neomutt-01" # Updated with provided project ID
 }
 
 variable "gcp_region_vm1" {
@@ -218,6 +218,7 @@ resource "google_compute_firewall" "vpc2_allow_icmp_internet_ipv4" { # New rule 
 
 resource "google_compute_firewall" "vpc2_allow_icmp_internet_ipv6" { # New rule for IPv6 ICMP
   name    = "vpc2-allow-icmp-internet-ipv6"
+  network = google_compute_network.vpc2.name # Corrected: Added missing 'network' argument
   direction = "INGRESS"
   source_ranges = ["::/0"]
   allow {
@@ -326,7 +327,7 @@ resource "google_compute_instance" "vm1" {
   # Ensure subnet, peering, and IPv6 propagation are fully configured before creating the instance
   depends_on = [
     google_compute_subnetwork.subnet1_dual,
-    google_compute_network_peering.vpc_peering,
+    google_compute_network_peering.vpc1_to_vpc2_peering, # Corrected: Reference updated peering resource name
     time_sleep.wait_for_subnet1_ipv6, # Added dependency on time_sleep
   ]
 }
@@ -364,7 +365,7 @@ resource "google_compute_instance" "vm2" {
   # Ensure subnet, peering, and IPv6 propagation are fully configured before creating the instance
   depends_on = [
     google_compute_subnetwork.subnet2_dual,
-    google_compute_network_peering.vpc_peering,
+    google_compute_network_peering.vpc2_to_vpc1_peering, # Corrected: Reference updated peering resource name
     time_sleep.wait_for_subnet2_ipv6, # Added dependency on time_sleep
   ]
 }
