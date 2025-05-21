@@ -408,3 +408,4 @@ output "vm2_private_ipv4" {
 
 # Removed vm2_private_ipv6 output as ipv6_internal_ip_address is not a valid attribute.
 # GCP instances do not expose their internal IPv6 address as a direct attribute.
+ 
