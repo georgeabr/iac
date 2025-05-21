@@ -8,7 +8,7 @@ provider "google" {
 variable "gcp_project_id" {
   description = "The GCP Project ID to deploy resources into."
   type        = string
-  # default     = "your-gcp-project-id" # Replace with your GCP Project ID
+  default     = "neomutt-01" # Updated with provided project ID
 }
 
 variable "gcp_region_vm1" {
