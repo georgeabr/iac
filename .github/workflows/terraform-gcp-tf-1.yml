@@ -1,0 +1,111 @@
+name: GCP Terraform CI/CD
+
+on:
+  push:
+    branches:
+      - main # Trigger the CI/CD workflow on pushes to the main branch
+    paths:
+      - 'gcp-tf-1/**' # Trigger only when changes are made in the gcp-tf-1 directory or its subdirectories
+
+  # Add a workflow_dispatch event to allow manual triggering
+  workflow_dispatch:
+    inputs:
+      destroy:
+        description: 'Set to true to run terraform destroy. Leave false or empty to run plan/apply.'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  GCP_PROJECT_ID: neomutt-01 # Your GCP Project ID
+  GCP_REGION: europe-west2 # Default GCP region for global resources if needed
+  GCS_BUCKET_NAME: tf-state-neomutt-01 # Your GCS bucket name for Terraform state. REPLACE WITH YOUR BUCKET NAME!
+  # Add variable for the SSH public key. This should come from a GitHub secret.
+  SSH_PUBLIC_KEY: ${{ secrets.GCP_SSH_PUBLIC_KEY }}
+
+jobs:
+  terraform_apply: # Job for Plan and Apply
+    name: Terraform Plan and Apply
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner
+
+    # This job runs on push events OR on manual triggers where destroy is NOT true
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.destroy != true)
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}' # Service Account Key JSON from GitHub Secret
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.11.4 # Specify the Terraform version you want to use
+
+    - name: Terraform Init
+      id: init
+      # Navigate to your Terraform root directory (gcp-tf-1) before running commands
+      run: |
+        cd gcp-tf-1
+        # Initialize Terraform with GCS backend configuration
+        terraform init -backend-config="bucket=${{ env.GCS_BUCKET_NAME }}"
+
+    - name: Terraform Plan
+      id: plan
+      # Navigate to your Terraform root directory (gcp-tf-1) before running commands
+      run: |
+        cd gcp-tf-1
+        terraform plan -no-color
+
+    # This step will run if the job is triggered (either by push or manual apply)
+    - name: Terraform Apply
+      run: |
+        cd gcp-tf-1
+        # Pass the SSH public key to Terraform using the -var option.
+        terraform apply -auto-approve -var="ssh_public_key=${{ env.SSH_PUBLIC_KEY }}"
+
+  terraform_destroy: # Job for Destruction
+    name: Terraform Destroy
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner
+
+    # This job runs only on manual triggers with destroy=true
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.destroy == true
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      id: auth_destroy
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}' # Service Account Key JSON from GitHub Secret
+
+    - name: Setup Terraform (for Destroy)
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.11.4 # Specify the Terraform version you want to use
+
+    - name: Terraform Init (for Destroy)
+      id: init_destroy
+      # Navigate to your Terraform root directory (gcp-tf-1) before running commands
+      run: |
+        cd gcp-tf-1
+        # Initialize Terraform with GCS backend configuration
+        terraform init -backend-config="bucket=${{ env.GCS_BUCKET_NAME }}"
+
+    - name: Terraform Destroy
+      id: destroy
+      # Navigate to your Terraform root directory (gcp-tf-1) before running commands
+      run: |
+        cd gcp-tf-1
+        # Pass the SSH public key to Terraform using the -var option.
+        terraform destroy -auto-approve -var="ssh_public_key=${{ env.SSH_PUBLIC_KEY }}"
