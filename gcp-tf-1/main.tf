@@ -138,7 +138,7 @@ resource "google_compute_firewall" "vpc1_allow_icmp_internet_ipv6" { # New rule 
   direction = "INGRESS"
   source_ranges = ["::/0"]
   allow {
-    protocol = "icmpv6" # Corrected: Use icmpv6 for IPv6 as per GCP error message
+    protocol = "icmp" # Corrected: Use icmpv6 for IPv6 as per GCP error message
   }
   target_tags = ["vm1-tag"]
 }
@@ -160,7 +160,7 @@ resource "google_compute_firewall" "vpc1_allow_icmp_from_vpc2_ipv6" { # New rule
   direction = "INGRESS"
   source_tags = ["vm2-tag"] # Corrected: Use source_tags for peering IPv6
   allow {
-    protocol = "icmpv6" # Corrected: Use icmpv6 for IPv6
+    protocol = "icmp" # Corrected: Use icmpv6 for IPv6
   }
   target_tags = ["vm1-tag"]
   depends_on = [google_compute_subnetwork.subnet2_dual] # Explicit dependency for IPv6 CIDR
