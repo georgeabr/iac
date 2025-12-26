@@ -5,7 +5,8 @@ In a folder `/mnt/data/backup/rhcsa-lab/rhcsa9` put the corresponding `Vagrantfi
 Two VMs will be created  
 Name: `alma9-1`, IP: `192.168.40.11`  
 Name: `alma9-2`, IP: `192.168.40.12`  
-Disks:  partitioned [`vda` - 19GB (`/` disk)]; unpartitioned [`vdb` - 10GB, `vdc` - 5GB]
+Disks:  partitioned [`vda` - 19GB (`/` disk)]; unpartitioned [`vdb` - 10GB, `vdc` - 5GB]  
+CDROM: full 12GB, location (can be changed) [`/mnt/data/ISO/AlmaLinux-9.7-x86_64-dvd.iso`]  
 
 To start the lab VMs
 ```bash
