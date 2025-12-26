@@ -1,0 +1,41 @@
+services:
+  docmost:
+    image: docmost/docmost:latest
+    container_name: docmost
+    depends_on:
+      - db
+      - redis
+    environment:
+      APP_URL: https://docmost.georgetech.co.uk
+      APP_SECRET: 0dffb958e87a8353d48b5335b0816f1b4e8473966cf7c01a9af2dbfad001cac8
+      DATABASE_URL: postgresql://docmost:YOUR_PASSWORD@db:5432/docmost?schema=public
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - /srv/docmost/data:/app/data
+    ports:
+      - "127.0.0.1:3010:3000" # Maps VM port 3010 to Docmost
+    restart: always
+
+  db:
+    image: postgres:16-alpine
+    container_name: docmost-db
+    environment:
+      POSTGRES_DB: docmost
+      POSTGRES_USER: docmost
+      POSTGRES_PASSWORD: YOUR_PASSWORD
+    volumes:
+      - /srv/docmost/db:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: docmost-redis
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    restart: always
