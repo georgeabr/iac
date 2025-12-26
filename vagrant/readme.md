@@ -39,11 +39,13 @@ vim ./lib/vagrant-libvirt/driver.rb
 less ./lib/vagrant-libvirt/driver.rb
 # make another branch
 git checkout -b no-libvirt-ip-command
-gem build vagrant-libvirt.gemspec
 # needed if build errors on Debian
 sudo apt install -y ruby-full build-essential libvirt-dev
+# build the gem
 gem build vagrant-libvirt.gemspec
+# uninstall buggy version
 vagrant plugin uninstall vagrant-libvirt
 vagrant plugin install ./vagrant-libvirt-0.12.3.pre.18.gem
+# confirm the gem is newer
 vagrant plugin list
 ```
