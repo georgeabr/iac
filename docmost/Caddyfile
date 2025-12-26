@@ -1,0 +1,17 @@
+# Place here - /etc/caddy/Caddyfile
+docmost.georgetech.co.uk {
+    # Match ONLY your specific /64 subnet
+    @allowed {
+        remote_ip 2a0a:8dc0:61:2000::/64
+    }
+
+    # If they are allowed, pass them to Docmost
+    handle @allowed {
+        reverse_proxy 127.0.0.1:3010
+    }
+
+    # If they didn't match the block above, kill the connection
+    handle {
+        abort
+    }
+}
