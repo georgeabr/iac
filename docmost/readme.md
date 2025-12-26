@@ -18,6 +18,9 @@ sudo mkdir -p /srv/docmost
 sudo chown -R $USER:$USER /srv/docmost/
 ```
 #### Configure the `Caddy` web server for the site
+Copy configuration file to `/etc/caddy/Caddyfile`  
+It configures the domain `docmost.georgetech.co.uk` as a public frontend to the service  
+It also whitelists only a certain range of IP addresses
 ```bash
 sudo systemctl restart caddy
 ```
