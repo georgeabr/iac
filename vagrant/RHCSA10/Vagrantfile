@@ -1,0 +1,33 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "almalinux/10"
+
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.memory = 2048
+    libvirt.cpus = 2
+    libvirt.storage_pool_name = "qemu-storage"
+  end
+
+  # Two VMs, each with two NICs (NAT + internal)
+  [
+    ["alma10-1", "192.168.50.11"],
+    ["alma10-2", "192.168.50.12"]
+  ].each do |name, private_ip|
+    config.vm.define name do |node|
+      node.vm.hostname = name
+
+      # eth0: NAT (default) — matches RHCSA exam
+      # No configuration needed; Vagrant/libvirt provides this automatically.
+
+      # eth1: Internal network — matches RHCSA exam
+      node.vm.network "private_network",
+        ip: private_ip,
+        libvirt__network_name: "rhcsa-internal-net"
+
+      # Optional: extra disks for LVM, Stratis, VDO, etc.
+      node.vm.provider :libvirt do |lv|
+        lv.storage :file, size: '10G', device: 'vdb'
+        lv.storage :file, size: '5G', device: 'vdc'
+      end
+    end
+  end
+end
