@@ -1,7 +1,8 @@
 
 
 ### How to configure and enable an instance of `Docmost` for notes and markdown
-This guide will set up a `Docmost` docker instance running at system boot via a service, with data stored in `/srv/docmost/`
+This guide will set up a `Docmost` docker instance running at system boot via a service, with data stored in `/srv/docmost/`  
+Requirements: `Caddy` web server, `Docker` orchestration tool
 #### Configure `Docmost` Dockerfile
 Create folder in home directory
 ```bash
