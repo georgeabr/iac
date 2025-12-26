@@ -30,6 +30,7 @@ vagrant destroy -f
 ```
 ### Get rid of warnings for `libvirt_ip_command`
 ```bash
+cd ~
 git clone https://github.com/vagrant-libvirt/vagrant-libvirt.git
 cd vagrant-libvirt
 grep -R "libvirt_ip_command" .
