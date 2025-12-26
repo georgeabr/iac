@@ -1,7 +1,7 @@
 #### Guide to set up a vagrant lab for RHCSA
 Version 9  
 These labs will create 2 VMs via libvirt on linux  
-In a folder `/mnt/data/backup/rhcsa-lab/rhcsa9` put the corresponding `Vagrantfile`
+In a folder `/mnt/data/backup/rhcsa-lab/rhcsa9` put the corresponding `Vagrantfile`  
 Two VMs will be created  
 Name: `alma9-1`, IP: `192.168.40.11`  
 Name: `alma9-2`, IP: `192.168.40.12`  
