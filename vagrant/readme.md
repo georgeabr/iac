@@ -1,13 +1,23 @@
 #### Guide to set up a vagrant lab for RHCSA
-Version 9  
+#### Version 9  
 These labs will create 2 VMs via libvirt on linux  
-In a folder `/mnt/data/backup/rhcsa-lab/rhcsa9` put the corresponding `Vagrantfile`  
 Two VMs will be created  
 Name: `alma9-1`, IP: `192.168.40.11`  
 Name: `alma9-2`, IP: `192.168.40.12`  
 Disks:  partitioned [`vda` - 19GB (`/` disk)]; unpartitioned [`vdb` - 10GB, `vdc` - 5GB]  
 CDROM: full 12GB, location (can be changed) [`/mnt/data/ISO/AlmaLinux-9.7-x86_64-dvd.iso`]  
 
+#### Prerequisite - define the `libvirt` storage pool used for storing the disks
+```bash
+sudo virsh pool-define-as --name qemu-storage --type dir --target /mnt/data/virt-storage/qemu
+```
+Start the pool and set it to auto-start
+```bash
+sudo virsh pool-start qemu-storage
+sudo virsh pool-autostart qemu-storage
+```
+
+In a folder `/mnt/data/backup/rhcsa-lab/rhcsa9` put the corresponding `Vagrantfile`  
 To create and start the lab VMs
 ```bash
 vagrant up
@@ -38,10 +48,10 @@ vagrant destroy -f
 cd ~
 git clone https://github.com/vagrant-libvirt/vagrant-libvirt.git
 cd vagrant-libvirt
+# locate the string
 grep -R "libvirt_ip_command" .
-vim ./lib/vagrant-libvirt/driver.rb
 # comment out the libvirt_ip line
-less ./lib/vagrant-libvirt/driver.rb
+vim ./lib/vagrant-libvirt/driver.rb
 # make another branch
 git checkout -b no-libvirt-ip-command
 # needed if build errors on Debian
@@ -50,6 +60,7 @@ sudo apt install -y ruby-full build-essential libvirt-dev
 gem build vagrant-libvirt.gemspec
 # uninstall buggy version
 vagrant plugin uninstall vagrant-libvirt
+# install compiled version
 vagrant plugin install ./vagrant-libvirt-0.12.3.pre.18.gem
 # confirm the gem is newer
 vagrant plugin list
