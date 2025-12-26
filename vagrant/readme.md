@@ -8,7 +8,7 @@ Name: `alma9-2`, IP: `192.168.40.12`
 Disks:  partitioned [`vda` - 19GB (`/` disk)]; unpartitioned [`vdb` - 10GB, `vdc` - 5GB]  
 CDROM: full 12GB, location (can be changed) [`/mnt/data/ISO/AlmaLinux-9.7-x86_64-dvd.iso`]  
 
-To start the lab VMs
+To create and start the lab VMs
 ```bash
 vagrant up
 ```
