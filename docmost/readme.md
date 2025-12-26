@@ -27,18 +27,20 @@ Start with
 ```bash
 sudo systemctl start docmost.service
 ```
-Check status with:
+Check status with
 ```bash
 systemctl status docmost.service
-#### Manually start the docker containers:
+```
+#### Manage the containers
+Manually start the docker containers
 ```bash
 docker compose up -d
 ```
-Manually stop the containers:
+Manually stop the containers
 ```bash
 docker compose down
 ```
-Check running containers and logs:
+Check running containers and logs
 ```bash
 docker ps
 docker logs -f docmost
