@@ -1,6 +1,7 @@
 
 
 ### How to configure and enable an instance of `Docmost` for notes and markdown
+This guide will set up a `Docmost` docker instance running at system boot via a service, with data stored in `/srv/docmost/`
 #### Configure `Docmost` Dockerfile
 Create folder in home directory
 ```bash
@@ -29,7 +30,8 @@ Check the web server status
 systemctl status caddy
 ```
 #### Configure the `docmost.service` to start at boot
-Copy the `docmost.service` unit to `/etc/systemd/system/docmost.service`.
+Copy the `docmost.service` unit to `/etc/systemd/system/docmost.service`  
+Make sure to check the `WorkingDirectory` is absolute path to `~/docmost`  
 Enable and start the service with
 ```bash
 sudo systemctl enable --now docmost.service
@@ -39,7 +41,8 @@ Check status with
 systemctl status docmost.service
 ```
 #### Manage the containers
-Manually start the docker containers
+You must be in the `~/docmost` folder  
+Manually start the docker containers  
 ```bash
 docker compose up -d
 ```
