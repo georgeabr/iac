@@ -5,11 +5,15 @@ In a folder `/mnt/data/backup/rhcsa-lab/rhcsa9` put the corresponding `Vagrantfi
 Two VMs will be created  
 Name: `alma9-1`, IP: `192.168.40.11`  
 Name: `alma9-2`, IP: `192.168.40.12`  
-
+Disks:  `vda` - 19GB (`/` disk); unpartitioned [`vdb` - 10GB, `vdc` - 5GB]
 
 To start the lab VMs
 ```bash
 vagrant up
+```
+To check status and name of the VMs  
+```bash
+vagrant status
 ```
 To connect to any of the VMs
 ```bash
