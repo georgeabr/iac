@@ -1,6 +1,6 @@
 
 
-### How to start up an instance of `Docmost` for notes and markdown
+### How to configure and enable an instance of `Docmost` for notes and markdown
 #### Configure `Docmost` Dockerfile
 Create folder in home directory
 ```bash
@@ -16,6 +16,14 @@ Create a folder for the `docmost` storage and take ownership:
 ```bash
 sudo mkdir -p /srv/docmost
 sudo chown -R $USER:$USER /srv/docmost/
+```
+#### Configure the `Caddy` web server for the site
+```bash
+sudo systemctl restart caddy
+```
+Check the web server status
+```bash
+systemctl status caddy
 ```
 #### Configure the `docmost.service` to start at boot
 Copy the `docmost.service` unit to `/etc/systemd/system/docmost.service`.
