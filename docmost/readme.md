@@ -19,13 +19,9 @@ sudo chown -R $USER:$USER /srv/docmost/
 ```
 #### Configure the `docmost.service` to start at boot
 Copy the `docmost.service` unit to `/etc/systemd/system/docmost.service`.
-Enable with:
+Enable and start the service with
 ```bash
-sudo systemctl enable docmost.service
-```
-Start with
-```bash
-sudo systemctl start docmost.service
+sudo systemctl enable --now docmost.service
 ```
 Check status with
 ```bash
