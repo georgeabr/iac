@@ -6,6 +6,14 @@ Name: `alma9-1`, IP: `192.168.40.11`
 Name: `alma9-2`, IP: `192.168.40.12`  
 Disks:  partitioned [`vda` - 19GB (`/` disk)]; unpartitioned [`vdb` - 10GB, `vdc` - 5GB]  
 CDROM: full 12GB, location (can be changed) [`/mnt/data/ISO/AlmaLinux-9.7-x86_64-dvd.iso`]  
+#### Version 10  
+These labs will create 2 VMs via libvirt on linux  
+Two VMs will be created  
+Name: `alma10-1`, IP: `192.168.50.11`  
+Name: `alma10-2`, IP: `192.168.50.12`  
+Disks:  partitioned [`vda` - 19GB (`/` disk)]; unpartitioned [`vdb` - 10GB, `vdc` - 5GB]  
+CDROM: full 12GB, location (can be changed) [`/mnt/data/ISO/AlmaLinux-10.1-x86_64-dvd.iso`]  
+CDROM will be used as local repos, software will be installed to mimic the real exam setup.  
 
 #### Prerequisite - define the `libvirt` storage pool used for storing the disks
 ```bash
