@@ -48,7 +48,7 @@ sudo -i
 ```
 To stop the lab VMs
 ```bash
-vagrant down
+vagrant halt
 ```
 
 To destroy the VMs
