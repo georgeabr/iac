@@ -2,32 +2,86 @@ Vagrant.configure("2") do |config|
   config.vm.box = "almalinux/10"
 
   config.vm.provider :libvirt do |libvirt|
-    libvirt.memory = 2048
+    libvirt.memory = 3072
     libvirt.cpus = 2
     libvirt.storage_pool_name = "qemu-storage"
   end
 
-  # Two VMs, each with two NICs (NAT + internal)
-  [
+  nodes = [
     ["alma10-1", "192.168.50.11"],
     ["alma10-2", "192.168.50.12"]
-  ].each do |name, private_ip|
+  ]
+
+  nodes.each do |name, private_ip|
     config.vm.define name do |node|
       node.vm.hostname = name
 
-      # eth0: NAT (default) — matches RHCSA exam
-      # No configuration needed; Vagrant/libvirt provides this automatically.
-
-      # eth1: Internal network — matches RHCSA exam
       node.vm.network "private_network",
         ip: private_ip,
         libvirt__network_name: "rhcsa-internal-net"
 
-      # Optional: extra disks for LVM, Stratis, VDO, etc.
+      # Optional extra disks and attach ISO as CDROM
       node.vm.provider :libvirt do |lv|
         lv.storage :file, size: '10G', device: 'vdb'
         lv.storage :file, size: '5G', device: 'vdc'
+        lv.storage :file,
+          device: :cdrom,
+          bus: :ide,
+          type: :raw,
+          path: '/mnt/data/ISO/AlmaLinux-10.1-x86_64-dvd.iso'
       end
+
+      # Per-node provisioning using local ISO only
+      node.vm.provision "shell", inline: <<-SHELL
+        set -euo pipefail
+
+        # Mount ISO: prefer libvirt CD, fallback to synced /vagrant ISO
+        mkdir -p /mnt/iso
+        if ! mountpoint -q /mnt/iso; then
+          if [ -b /dev/cdrom ]; then
+            mount -o ro /dev/cdrom /mnt/iso || true
+          fi
+          if ! mountpoint -q /mnt/iso && [ -f /vagrant/AlmaLinux-10.1-x86_64-dvd.iso ]; then
+            mount -o ro,loop /vagrant/AlmaLinux-10.1-x86_64-dvd.iso /mnt/iso
+          fi
+        fi
+
+        # Create local file:// repos (BaseOS and AppStream)
+        cat > /etc/yum.repos.d/local-iso.repo <<'EOF'
+[local-iso-baseos]
+name=Local ISO BaseOS
+baseurl=file:///mnt/iso/BaseOS
+enabled=1
+gpgcheck=0
+
+[local-iso-appstream]
+name=Local ISO AppStream
+baseurl=file:///mnt/iso/AppStream
+enabled=1
+gpgcheck=0
+EOF
+
+        # Disable all other repos and enable only local ISO repos
+        dnf config-manager --set-disabled '*'
+        dnf config-manager --set-enabled local-iso-baseos local-iso-appstream
+
+        dnf clean all
+        dnf makecache
+
+        # Install RHCSA-relevant packages strictly from the ISO
+        dnf --disablerepo='*' --enablerepo=local-iso-baseos,local-iso-appstream install -y \
+          firewalld flatpak lvm2 vdo stratis-cli stratisd \
+          nfs-utils autofs vim bash-completion tar \
+          policycoreutils-python-utils chrony psmisc \
+          man-pages bind-utils
+
+        # Enable essential daemons
+        systemctl enable --now firewalld
+        systemctl enable --now stratisd
+        systemctl enable --now chronyd
+
+      SHELL
     end
   end
 end
+
