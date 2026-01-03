@@ -16,7 +16,11 @@ Start the pool and set it to auto-start
 sudo virsh pool-start qemu-storage
 sudo virsh pool-autostart qemu-storage
 ```
-
+Enable auto-start for the networks
+```bash
+sudo virsh net-autostart rhcsa-internal-net
+sudo virsh net-autostart vagrant-libvirt
+```
 In a folder `/mnt/data/backup/rhcsa-lab/rhcsa9` put the corresponding `Vagrantfile`  
 To create and start the lab VMs
 ```bash
