@@ -78,7 +78,7 @@ EOF
         dnf --disablerepo='*' --enablerepo=local-iso-baseos,local-iso-appstream install -y \
           firewalld flatpak lvm2 vdo stratis-cli stratisd \
           nfs-utils autofs vim bash-completion tar \
-          policycoreutils-python-utils chrony psmisc \
+          policycoreutils-python-utils chrony psmisc acl \
           man-pages bind-utils
 
         # Enable essential daemons
