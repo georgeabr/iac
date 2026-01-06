@@ -31,6 +31,7 @@ sudo virsh pool-autostart qemu-storage
 ```
 Enable auto-start for the networks
 ```bash
+sudo virsh net-start default
 sudo virsh net-autostart rhcsa-internal-net
 sudo virsh net-autostart vagrant-libvirt
 ```
