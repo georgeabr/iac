@@ -16,9 +16,15 @@ Vagrant.configure("2") do |config|
     config.vm.define name do |node|
       node.vm.hostname = name
 
+      # eth1: Configured interface for VM network only
       node.vm.network "private_network",
         ip: private_ip,
         libvirt__network_name: "rhcsa-internal-net"
+      # eth2: Unconfigured interface for manual practice
+      node.vm.network "private_network", 
+        libvirt__network_name: "rhcsa-practice-net",
+        type: "dhcp",
+        auto_config: false
 
       # Optional extra disks and attach ISO as CDROM
       node.vm.provider :libvirt do |lv|
@@ -84,4 +90,3 @@ EOF
     end
   end
 end
-
