@@ -16,6 +16,11 @@ CDROM: full 12GB, location (can be changed) [`/mnt/data/ISO/AlmaLinux-10.1-x86_6
 CDROM will be used as local repos, software will be installed to mimic the real exam setup.  
 
 #### Prerequisite - define the `libvirt` storage pool used for storing the disks
+You need to be a member of the `libvirt` group.  
+To change the URI to the system session, so you don't need to use `sudo` for `virsh`:  
+```bash
+printf 'uri_default = "qemu:///system"\n' >> ~/.config/libvirt/libvirt.conf
+```
 ```bash
 sudo virsh pool-define-as --name qemu-storage --type dir --target /mnt/data/virt-storage/qemu
 ```
