@@ -81,6 +81,14 @@ EOF
           policycoreutils-python-utils chrony psmisc acl \
           man-pages bind-utils
 
+        # 1. Update GRUB Timeout to 3 seconds
+        echo "Updating GRUB timeout..."
+        sed -i 's/^GRUB_TIMEOUT=0/GRUB_TIMEOUT=3/' /etc/default/grub
+        
+        # 2. Rebuild the GRUB configuration
+        # In AlmaLinux 10, /boot/grub2/grub.cfg is the correct unified location
+        grub2-mkconfig -o /boot/grub2/grub.cfg
+
         # Enable essential daemons
         systemctl enable --now firewalld
         systemctl enable --now stratisd
