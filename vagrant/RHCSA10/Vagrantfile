@@ -79,7 +79,7 @@ EOF
           firewalld flatpak lvm2 vdo stratis-cli stratisd \
           nfs-utils autofs vim bash-completion tar \
           policycoreutils-python-utils chrony psmisc acl \
-          man-pages bind-utils
+          man-pages bind-utils nano
 
         # 1. Update GRUB Timeout to 3 seconds
         echo "Updating GRUB timeout..."
